@@ -56,6 +56,7 @@ namespace testAPP
 
         }
 
+        //검색
         private void search_Click(object sender, EventArgs e)
         {
             string searchText = tb_search.Text.ToLower();
