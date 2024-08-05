@@ -113,17 +113,17 @@ namespace testAPP
             tb_description.Text = "";
         }
 
-
+        //리스트 칼럼 정렬
         private void list_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             if (e.Column == sortColumn)
             {
-                // 기존 정렬 방향을 변경
+                // 기존칼럼을 눌렀을때 정렬 방향을 변경
                 sortOrder = (sortOrder == SortOrder.Ascending) ? SortOrder.Descending : SortOrder.Ascending;
             }
             else
             {
-                // 새로운 칼럼을 정렬
+                // 새로운 칼럼을 오름차순 정렬
                 sortColumn = e.Column;
                 sortOrder = SortOrder.Ascending;
             }
