@@ -51,9 +51,6 @@
             this.lv_list.Size = new System.Drawing.Size(760, 214);
             this.lv_list.TabIndex = 5;
             this.lv_list.UseCompatibleStateImageBehavior = false;
-            this.lv_list.SelectedIndexChanged += new System.EventHandler(this.list_SelectedIndexChanged_1);
-            this.lv_list.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ly_click);
-            this.lv_list.ImeModeChanged += new System.EventHandler(this.list_ImeModeChanged);
             // 
             // bt_search
             // 
@@ -82,6 +79,7 @@
             this.bt_delete.TabIndex = 3;
             this.bt_delete.Text = "삭제";
             this.bt_delete.UseVisualStyleBackColor = true;
+            this.bt_delete.Click += new System.EventHandler(this.bt_delete_Click);
             // 
             // tb_search
             // 

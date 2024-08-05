@@ -24,6 +24,7 @@ namespace testAPP
 
         private SortOrder sortOrder = SortOrder.Ascending;
         private int sortColumn = -1;
+        private int selectedIndex = -1; // 선택된 항목의 인덱스를 저장할 변수
 
         public Form1()
         {
@@ -44,6 +45,9 @@ namespace testAPP
 
             // ColumnClick 이벤트 핸들러 추가
             lv_list.ColumnClick += new ColumnClickEventHandler(list_ColumnClick);
+
+            // SelectedIndexChanged 이벤트 핸들러 추가
+            lv_list.SelectedIndexChanged += new EventHandler(lv_list_SelectedIndexChanged);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -112,7 +116,6 @@ namespace testAPP
 
         }
 
-
         private void list_SelectedIndexChanged_1(object sender, EventArgs e)
         {
 
@@ -164,16 +167,88 @@ namespace testAPP
                 return returnVal;
             }
         }
-        
+
+        // 리스트뷰 항목 클릭 시 텍스트박스에 내용 출력
+        private void lv_list_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lv_list.SelectedItems.Count > 0)
+            {
+                ListViewItem selectedItem = lv_list.SelectedItems[0];
+                selectedIndex = lv_list.Items.IndexOf(selectedItem); // 선택된 항목의 인덱스 저장
+                tb_title.Text = selectedItem.SubItems[1].Text;
+                tb_writer.Text = selectedItem.SubItems[2].Text;
+                tb_genre.Text = selectedItem.SubItems[3].Text;
+                tb_description.Text = selectedItem.SubItems[4].Text;
+            }
+        }
+
         //수정
         private void bt_edit_Click(object sender, EventArgs e)
         {
+            if (selectedIndex != -1)
+            {
+                // 텍스트박스의 수정된 내용을 읽어옴
+                string title = tb_title.Text.Trim();
+                string writer = tb_writer.Text.Trim();
+                string genre = tb_genre.Text.Trim();
+                string description = tb_description.Text.Trim();
 
+                // 선택된 항목의 데이터 수정
+                data[selectedIndex][1] = title;
+                data[selectedIndex][2] = writer;
+                data[selectedIndex][3] = genre;
+                data[selectedIndex][4] = description;
+
+                // 리스트뷰 업데이트
+                UpdateListView();
+
+                // 선택된 항목 초기화
+                selectedIndex = -1;
+
+                // 텍스트박스 초기화
+                tb_title.Text = "";
+                tb_writer.Text = "";
+                tb_genre.Text = "";
+                tb_description.Text = "";
+            }
+            else
+            {
+                MessageBox.Show("수정할 항목을 선택하세요.");
+            }
+        }
+
+        //삭제
+        private void bt_delete_Click(object sender, EventArgs e)
+        {
+            if (selectedIndex != -1)
+            {
+                // 선택된 항목의 데이터 삭제
+                data.RemoveAt(selectedIndex);
+
+                // 리스트뷰 업데이트
+                UpdateListView();
+
+                // 전체 도서수 업데이트
+                total_books.Text = "전체 도서수 : " + data.Count.ToString();
+
+                // 선택된 항목 초기화
+                selectedIndex = -1;
+
+                // 텍스트박스 초기화
+                tb_title.Text = "";
+                tb_writer.Text = "";
+                tb_genre.Text = "";
+                tb_description.Text = "";
+            }
+            else
+            {
+                MessageBox.Show("삭제할 항목을 선택하세요.");
+            }
         }
 
         private void ly_click(object sender, MouseEventArgs e)
         {
-            if()
+
         }
     }
 }
