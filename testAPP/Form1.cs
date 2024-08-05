@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Npgsql.Internal;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -74,7 +75,7 @@ namespace testAPP
                 }
             }
         }
-
+        //
         //삽입
         private void insert_Click(object sender, EventArgs e)
         {
@@ -111,15 +112,6 @@ namespace testAPP
             tb_description.Text = "";
         }
 
-        private void list_ImeModeChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void list_SelectedIndexChanged_1(object sender, EventArgs e)
-        {
-
-        }
 
         private void list_ColumnClick(object sender, ColumnClickEventArgs e)
         {
@@ -188,7 +180,7 @@ namespace testAPP
             if (selectedIndex != -1)
             {
                 // 텍스트박스의 수정된 내용을 읽어옴
-                string title = tb_title.Text.Trim();
+                /*string title = tb_title.Text.Trim();
                 string writer = tb_writer.Text.Trim();
                 string genre = tb_genre.Text.Trim();
                 string description = tb_description.Text.Trim();
@@ -197,7 +189,13 @@ namespace testAPP
                 data[selectedIndex][1] = title;
                 data[selectedIndex][2] = writer;
                 data[selectedIndex][3] = genre;
-                data[selectedIndex][4] = description;
+                data[selectedIndex][4] = description;*/
+
+                //텍스트박스 읽어와서 데이터 수정(최적화)
+                data[selectedIndex][1] = tb_title.Text.Trim();
+                data[selectedIndex][2] = tb_writer.Text.Trim();
+                data[selectedIndex][3] = tb_genre.Text.Trim();
+                data[selectedIndex][4] = tb_description.Text.Trim();
 
                 // 리스트뷰 업데이트
                 UpdateListView();
@@ -244,11 +242,6 @@ namespace testAPP
             {
                 MessageBox.Show("삭제할 항목을 선택하세요.");
             }
-        }
-
-        private void ly_click(object sender, MouseEventArgs e)
-        {
-
         }
     }
 }
