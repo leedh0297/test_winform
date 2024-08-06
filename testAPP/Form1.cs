@@ -388,6 +388,12 @@ namespace testAPP
 
             // 검색어 텍스트박스 초기화
             tb_search.Text = "";
+
+            // 텍스트박스 초기화
+            tb_title.Text = "";
+            tb_writer.Text = "";
+            tb_genre.Text = "";
+            tb_description.Text = "";
         }
 
         // 콤보박스 초기화
@@ -455,11 +461,6 @@ namespace testAPP
                     lv_list.Items.Add(item);
                 }
             }
-        }
-
-        private void cb_column_CheckedChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }
