@@ -9,9 +9,9 @@ namespace testAPP
 {
     public partial class Form1 : Form
     {
-        private List<string[]> data = new List<string[]>();
-        private SortOrder sortOrder = SortOrder.Ascending;
-        private int sortColumn = -1;
+        private List<string[]> data = new List<string[]>(); // 데이터를 저장할 리스트
+        private SortOrder sortOrder = SortOrder.Ascending; // 정렬 순서
+        private int sortColumn = -1; // 정렬할 컬럼의 인덱스
         private int selectedIndex = -1; // 선택된 항목의 인덱스를 저장할 변수
 
         private string connectionString = "Host=192.168.201.151;Username=postgres;Password=12345678;Database=internTest"; // PostgreSQL 연결 문자열
@@ -23,9 +23,13 @@ namespace testAPP
             // ListView의 열을 동적으로 설정
             SetupListViewColumns();
 
+            // 콤보박스 초기화
+            SetupComboBox();
+
             // 데이터베이스에서 데이터 로드
             LoadDataFromDatabase();
 
+            // 전체 도서 수 표시
             total_books.Text = "전체 도서수 : " + data.Count.ToString();
 
             // ColumnClick 이벤트 핸들러 추가
@@ -66,7 +70,7 @@ namespace testAPP
                 }
             }
 
-            lv_list.View = View.Details;
+            lv_list.View = View.Details; // ListView를 상세보기로 설정
         }
 
         // 데이터베이스에서 데이터 로드
@@ -79,7 +83,7 @@ namespace testAPP
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
-                        data.Clear();
+                        data.Clear(); // 기존 데이터를 지움
                         while (reader.Read())
                         {
                             string[] row = new string[reader.FieldCount];
@@ -87,36 +91,23 @@ namespace testAPP
                             {
                                 row[i] = reader[i].ToString();
                             }
-                            data.Add(row);
+                            data.Add(row); // 새 데이터를 추가
                         }
                     }
                 }
             }
-            UpdateListView();
+            UpdateListView(); // ListView를 업데이트
         }
 
-        // 검색
+        // 검색 버튼 클릭 시
         private void search_Click(object sender, EventArgs e)
         {
-            string searchText = tb_search.Text.ToLower();
-            UpdateListView(searchText);
+            string searchText = tb_search.Text.ToLower(); // 검색어를 소문자로 변환
+            string selectedColumn = cb_filter.SelectedItem.ToString(); // 선택된 콤보박스 항목
+            UpdateListView(selectedColumn, searchText); // ListView를 업데이트
         }
 
-        private void UpdateListView(string searchText = "")
-        {
-            lv_list.Items.Clear();
-
-            foreach (string[] row in data)
-            {
-                if (string.IsNullOrEmpty(searchText) || row.Any(col => col.ToLower().Contains(searchText)))
-                {
-                    ListViewItem item = new ListViewItem(row);
-                    lv_list.Items.Add(item);
-                }
-            }
-        }
-
-        // 삽입
+        // 삽입 버튼 클릭 시
         private void insert_Click(object sender, EventArgs e)
         {
             string title = tb_title.Text.Trim();
@@ -137,11 +128,12 @@ namespace testAPP
                 conn.Open();
                 using (var cmd = new NpgsqlCommand("INSERT INTO book (title, writer, genre, description) VALUES (@title, @writer, @genre, @description)", conn))
                 {
+                    // 파라미터 설정
                     cmd.Parameters.AddWithValue("title", title);
                     cmd.Parameters.AddWithValue("writer", writer);
                     cmd.Parameters.AddWithValue("genre", genre);
                     cmd.Parameters.AddWithValue("description", description);
-                    cmd.ExecuteNonQuery();
+                    cmd.ExecuteNonQuery(); // 쿼리 실행
                 }
             }
 
@@ -158,7 +150,7 @@ namespace testAPP
             tb_description.Text = "";
         }
 
-        // 리스트 칼럼 정렬
+        // 리스트 칼럼 클릭 시 정렬
         private void list_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             if (e.Column == sortColumn)
@@ -177,11 +169,11 @@ namespace testAPP
             lv_list.ListViewItemSorter = new ListViewItemComparer(e.Column, sortOrder);
         }
 
-        // ListViewItemComparer 클래스
+        // ListViewItemComparer 클래스: ListView 정렬을 위한 클래스
         public class ListViewItemComparer : IComparer
         {
-            private int col;
-            private SortOrder order;
+            private int col; // 정렬할 컬럼
+            private SortOrder order; // 정렬 순서
 
             public ListViewItemComparer()
             {
@@ -211,7 +203,7 @@ namespace testAPP
         {
             if (lv_list.SelectedItems.Count > 0)
             {
-                ListViewItem selectedItem = lv_list.SelectedItems[0];
+                ListViewItem selectedItem = lv_list.SelectedItems[0]; // 선택된 항목
                 selectedIndex = lv_list.Items.IndexOf(selectedItem); // 선택된 항목의 인덱스 저장
                 for (int i = 1; i < lv_list.Columns.Count; i++)
                 {
@@ -235,12 +227,12 @@ namespace testAPP
             }
         }
 
-        // 수정
+        // 수정 버튼 클릭 시
         private void bt_edit_Click(object sender, EventArgs e)
         {
             if (selectedIndex != -1)
             {
-                int id = int.Parse(lv_list.SelectedItems[0].SubItems[0].Text);
+                int id = int.Parse(lv_list.SelectedItems[0].SubItems[0].Text); // 선택된 항목의 ID
                 string title = tb_title.Text.Trim();
                 string writer = tb_writer.Text.Trim();
                 string genre = tb_genre.Text.Trim();
@@ -251,12 +243,13 @@ namespace testAPP
                     conn.Open();
                     using (var cmd = new NpgsqlCommand("UPDATE book SET title = @title, writer = @writer, genre = @genre, description = @description WHERE id = @id", conn))
                     {
+                        // 파라미터 설정
                         cmd.Parameters.AddWithValue("id", id);
                         cmd.Parameters.AddWithValue("title", title);
                         cmd.Parameters.AddWithValue("writer", writer);
                         cmd.Parameters.AddWithValue("genre", genre);
                         cmd.Parameters.AddWithValue("description", description);
-                        cmd.ExecuteNonQuery();
+                        cmd.ExecuteNonQuery(); // 쿼리 실행
                     }
                 }
 
@@ -278,12 +271,12 @@ namespace testAPP
             }
         }
 
-        // 삭제
+        // 삭제 버튼 클릭 시
         private void bt_delete_Click(object sender, EventArgs e)
         {
             if (selectedIndex != -1)
             {
-                int id = int.Parse(lv_list.SelectedItems[0].SubItems[0].Text);
+                int id = int.Parse(lv_list.SelectedItems[0].SubItems[0].Text); // 선택된 항목의 ID
 
                 using (var conn = new NpgsqlConnection(connectionString))
                 {
@@ -291,7 +284,7 @@ namespace testAPP
                     using (var cmd = new NpgsqlCommand("DELETE FROM book WHERE id = @id", conn))
                     {
                         cmd.Parameters.AddWithValue("id", id);
-                        cmd.ExecuteNonQuery();
+                        cmd.ExecuteNonQuery(); // 쿼리 실행
                     }
                 }
 
@@ -316,7 +309,7 @@ namespace testAPP
             }
         }
 
-        //새로고침
+        // 새로고침 버튼 클릭 시
         private void bt_refresh_Click(object sender, EventArgs e)
         {
             // 데이터베이스에서 데이터 다시 로드
@@ -324,6 +317,79 @@ namespace testAPP
 
             // 전체 도서수 업데이트
             total_books.Text = "전체 도서수 : " + data.Count.ToString();
+
+            // 콤보박스를 '전체'로 설정
+            cb_filter.SelectedIndex = 0;
+
+            // 검색어 텍스트박스 초기화
+            tb_search.Text = "";
+        }
+
+        // 콤보박스 초기화
+        private void SetupComboBox()
+        {
+            // 콤보박스 초기화
+            cb_filter.Items.Clear();
+            cb_filter.Items.Add("전체");
+
+            using (var conn = new NpgsqlConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand("SELECT column_name FROM information_schema.columns WHERE table_name = 'book'", conn))
+                {
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string columnName = reader["column_name"].ToString();
+                            if (columnName != "id") // 'id' 열은 필터에 포함하지 않음
+                            {
+                                cb_filter.Items.Add(columnName);
+                            }
+                        }
+                    }
+                }
+            }
+
+            cb_filter.SelectedIndex = 0; // 기본 설정은 '전체'
+        }
+
+        // 콤보박스 선택 항목 변경 시
+        private void cb_filter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selectedColumn = cb_filter.SelectedItem.ToString(); // 선택된 콤보박스 항목
+            string searchText = tb_search.Text.ToLower(); // 검색어를 소문자로 변환
+            UpdateListView(selectedColumn, searchText); // ListView를 업데이트
+        }
+
+        // ListView 업데이트
+        private void UpdateListView(string filterColumn = "", string searchText = "")
+        {
+            lv_list.Items.Clear();
+
+            foreach (string[] row in data)
+            {
+                bool addRow = true;
+                if (!string.IsNullOrEmpty(searchText))
+                {
+                    addRow = row.Any(col => col.ToLower().Contains(searchText));
+                }
+
+                if (addRow && !string.IsNullOrEmpty(filterColumn) && filterColumn != "전체")
+                {
+                    int columnIndex = lv_list.Columns.Cast<ColumnHeader>().ToList().FindIndex(c => c.Text == filterColumn);
+                    if (columnIndex != -1)
+                    {
+                        addRow = row[columnIndex].ToLower().Contains(searchText);
+                    }
+                }
+
+                if (addRow)
+                {
+                    ListViewItem item = new ListViewItem(row);
+                    lv_list.Items.Add(item);
+                }
+            }
         }
     }
 }
