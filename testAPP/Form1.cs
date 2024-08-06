@@ -216,27 +216,82 @@ namespace testAPP
             {
                 ListViewItem selectedItem = lv_list.SelectedItems[0]; // 선택된 항목
                 selectedIndex = lv_list.Items.IndexOf(selectedItem); // 선택된 항목의 인덱스 저장
-                for (int i = 1; i < lv_list.Columns.Count; i++)
+
+                // 선택된 필터 컬럼을 가져옴
+                string selectedColumn = cb_filter.SelectedItem.ToString();
+
+                // '전체'가 선택된 경우 또는 체크박스가 체크되지 않은 경우
+                if (selectedColumn == "전체" || !cb_column.Checked)
                 {
-                    // 동적으로 텍스트박스에 값 설정
-                    switch (i)
+                    // 모든 컬럼의 데이터를 텍스트박스에 출력
+                    for (int i = 1; i < lv_list.Columns.Count; i++)
                     {
-                        case 1:
-                            tb_title.Text = selectedItem.SubItems[i].Text;
-                            break;
-                        case 2:
-                            tb_writer.Text = selectedItem.SubItems[i].Text;
-                            break;
-                        case 3:
-                            tb_genre.Text = selectedItem.SubItems[i].Text;
-                            break;
-                        case 4:
-                            tb_description.Text = selectedItem.SubItems[i].Text;
-                            break;
+                        switch (i)
+                        {
+                            case 1:
+                                tb_title.Text = selectedItem.SubItems[i].Text;
+                                break;
+                            case 2:
+                                tb_writer.Text = selectedItem.SubItems[i].Text;
+                                break;
+                            case 3:
+                                tb_genre.Text = selectedItem.SubItems[i].Text;
+                                break;
+                            case 4:
+                                tb_description.Text = selectedItem.SubItems[i].Text;
+                                break;
+                        }
+                    }
+                }
+                else
+                {
+                    // 체크박스가 체크되어 있고 '전체'가 아닌 다른 항목이 선택된 경우
+                    for (int i = 0; i < lv_list.Columns.Count; i++)
+                    {
+                        // 현재 컬럼이 필터 컬럼과 일치할 때만 텍스트박스에 값 설정
+                        if (lv_list.Columns[i].Text == selectedColumn)
+                        {
+                            switch (i)
+                            {
+                                case 1:
+                                    tb_title.Text = selectedItem.SubItems[i].Text;
+                                    break;
+                                case 2:
+                                    tb_writer.Text = selectedItem.SubItems[i].Text;
+                                    break;
+                                case 3:
+                                    tb_genre.Text = selectedItem.SubItems[i].Text;
+                                    break;
+                                case 4:
+                                    tb_description.Text = selectedItem.SubItems[i].Text;
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            // 필터 컬럼이 아닌 경우에는 텍스트박스를 비움
+                            switch (i)
+                            {
+                                case 1:
+                                    tb_title.Text = "";
+                                    break;
+                                case 2:
+                                    tb_writer.Text = "";
+                                    break;
+                                case 3:
+                                    tb_genre.Text = "";
+                                    break;
+                                case 4:
+                                    tb_description.Text = "";
+                                    break;
+                            }
+                        }
                     }
                 }
             }
         }
+
+
 
         // 수정 버튼 클릭 시
         private void bt_edit_Click(object sender, EventArgs e)
