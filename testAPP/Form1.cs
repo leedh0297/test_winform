@@ -20,13 +20,8 @@ namespace testAPP
         {
             InitializeComponent();
 
-            // list뷰 칼럼 추가
-            lv_list.Columns.Add("ID", 50);
-            lv_list.Columns.Add("Title", 150);
-            lv_list.Columns.Add("Writer", 100);
-            lv_list.Columns.Add("Genre", 100);
-            lv_list.Columns.Add("Description", 300);
-            lv_list.View = View.Details;
+            // ListView의 열을 동적으로 설정
+            SetupListViewColumns();
 
             // 데이터베이스에서 데이터 로드
             LoadDataFromDatabase();
@@ -42,7 +37,36 @@ namespace testAPP
 
         private void Form1_Load(object sender, EventArgs e)
         {
+        }
 
+        // 테이블의 칼럼을 ListView에 동적으로 추가
+        private void SetupListViewColumns()
+        {
+            lv_list.Columns.Clear();
+
+            using (var conn = new NpgsqlConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'book'", conn))
+                {
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string columnName = reader["column_name"].ToString();
+                            string dataType = reader["data_type"].ToString();
+
+                            // 열 너비를 데이터 유형에 따라 결정 (여기서는 임의로 설정)
+                            int columnWidth = dataType == "text" ? 300 : 100;
+
+                            // 열 추가
+                            lv_list.Columns.Add(columnName, columnWidth);
+                        }
+                    }
+                }
+            }
+
+            lv_list.View = View.Details;
         }
 
         // 데이터베이스에서 데이터 로드
@@ -51,21 +75,18 @@ namespace testAPP
             using (var conn = new NpgsqlConnection(connectionString))
             {
                 conn.Open();
-                using (var cmd = new NpgsqlCommand("SELECT id, title, writer, genre, description FROM book", conn))
+                using (var cmd = new NpgsqlCommand("SELECT * FROM book", conn))
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
                         data.Clear();
                         while (reader.Read())
                         {
-                            string[] row = new string[]
+                            string[] row = new string[reader.FieldCount];
+                            for (int i = 0; i < reader.FieldCount; i++)
                             {
-                                reader["id"].ToString(),
-                                reader["title"].ToString(),
-                                reader["writer"].ToString(),
-                                reader["genre"].ToString(),
-                                reader["description"].ToString()
-                            };
+                                row[i] = reader[i].ToString();
+                            }
                             data.Add(row);
                         }
                     }
@@ -137,7 +158,6 @@ namespace testAPP
             tb_description.Text = "";
         }
 
-
         // 리스트 칼럼 정렬
         private void list_ColumnClick(object sender, ColumnClickEventArgs e)
         {
@@ -193,10 +213,25 @@ namespace testAPP
             {
                 ListViewItem selectedItem = lv_list.SelectedItems[0];
                 selectedIndex = lv_list.Items.IndexOf(selectedItem); // 선택된 항목의 인덱스 저장
-                tb_title.Text = selectedItem.SubItems[1].Text;
-                tb_writer.Text = selectedItem.SubItems[2].Text;
-                tb_genre.Text = selectedItem.SubItems[3].Text;
-                tb_description.Text = selectedItem.SubItems[4].Text;
+                for (int i = 1; i < lv_list.Columns.Count; i++)
+                {
+                    // 동적으로 텍스트박스에 값 설정
+                    switch (i)
+                    {
+                        case 1:
+                            tb_title.Text = selectedItem.SubItems[i].Text;
+                            break;
+                        case 2:
+                            tb_writer.Text = selectedItem.SubItems[i].Text;
+                            break;
+                        case 3:
+                            tb_genre.Text = selectedItem.SubItems[i].Text;
+                            break;
+                        case 4:
+                            tb_description.Text = selectedItem.SubItems[i].Text;
+                            break;
+                    }
+                }
             }
         }
 
@@ -279,6 +314,16 @@ namespace testAPP
             {
                 MessageBox.Show("삭제할 항목을 선택하세요.");
             }
+        }
+
+        //새로고침
+        private void bt_refresh_Click(object sender, EventArgs e)
+        {
+            // 데이터베이스에서 데이터 다시 로드
+            LoadDataFromDatabase();
+
+            // 전체 도서수 업데이트
+            total_books.Text = "전체 도서수 : " + data.Count.ToString();
         }
     }
 }

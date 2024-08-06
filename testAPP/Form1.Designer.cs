@@ -41,6 +41,7 @@
             this.tb_writer = new System.Windows.Forms.TextBox();
             this.bt_edit = new System.Windows.Forms.Button();
             this.cb_column = new System.Windows.Forms.ComboBox();
+            this.bt_refresh = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lv_list
@@ -118,7 +119,7 @@
             // 
             this.tb_description.Location = new System.Drawing.Point(420, 305);
             this.tb_description.Name = "tb_description";
-            this.tb_description.Size = new System.Drawing.Size(271, 21);
+            this.tb_description.Size = new System.Drawing.Size(352, 21);
             this.tb_description.TabIndex = 11;
             this.tb_description.Text = "내용";
             // 
@@ -149,11 +150,24 @@
             this.cb_column.TabIndex = 14;
             this.cb_column.SelectedIndexChanged += new System.EventHandler(this.bt_edit_Click);
             // 
+            // bt_refresh
+            // 
+            this.bt_refresh.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.bt_refresh.FlatAppearance.BorderSize = 0;
+            this.bt_refresh.Location = new System.Drawing.Point(697, 332);
+            this.bt_refresh.Name = "bt_refresh";
+            this.bt_refresh.Size = new System.Drawing.Size(75, 23);
+            this.bt_refresh.TabIndex = 15;
+            this.bt_refresh.Text = "새로고침";
+            this.bt_refresh.UseVisualStyleBackColor = true;
+            this.bt_refresh.Click += new System.EventHandler(this.bt_refresh_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 449);
+            this.Controls.Add(this.bt_refresh);
             this.Controls.Add(this.cb_column);
             this.Controls.Add(this.bt_edit);
             this.Controls.Add(this.tb_writer);
@@ -188,6 +202,7 @@
         private System.Windows.Forms.TextBox tb_writer;
         private System.Windows.Forms.Button bt_edit;
         private System.Windows.Forms.ComboBox cb_column;
+        private System.Windows.Forms.Button bt_refresh;
     }
 }
 
