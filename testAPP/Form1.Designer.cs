@@ -143,6 +143,7 @@
             // 
             // cb_filter
             // 
+            this.cb_filter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cb_filter.FormattingEnabled = true;
             this.cb_filter.Location = new System.Drawing.Point(591, 15);
             this.cb_filter.Name = "cb_filter";
