@@ -189,28 +189,17 @@ namespace testAPP
 
             public int Compare(object x, object y)
             {
-                int returnVal = 0;
-                ListViewItem itemX = (ListViewItem)x;
-                ListViewItem itemY = (ListViewItem)y;
-                string xText = itemX.SubItems[col].Text;
-                string yText = itemY.SubItems[col].Text;
-
-                // 숫자 비교
-                if (double.TryParse(xText, out double xValue) && double.TryParse(yText, out double yValue))
+                int returnVal;
+                if (col == 0) // 첫 번째 열 (id 열)은 숫자형으로 정렬
                 {
-                    returnVal = xValue.CompareTo(yValue);
+                    int id1 = int.Parse(((ListViewItem)x).SubItems[col].Text);
+                    int id2 = int.Parse(((ListViewItem)y).SubItems[col].Text);
+                    returnVal = id1.CompareTo(id2);
                 }
-
-                // 날짜 비교
-                //else if (DateTime.TryParse(xText, out DateTime xDate) && double.TryParse(yText, out DateTime yDate))
-                //{
-                //    returnVal = xDate.CompareTo(yDate);
-                //}
-
-                // 문자열 비교
                 else
                 {
-                    returnVal = String.Compare(xText, yText);
+                    returnVal = String.Compare(((ListViewItem)x).SubItems[col].Text,
+                                               ((ListViewItem)y).SubItems[col].Text);
                 }
 
                 if (order == SortOrder.Descending)
@@ -218,25 +207,6 @@ namespace testAPP
 
                 return returnVal;
             }
-            //{
-            //    int returnVal;
-            //    if (col == 0) // 첫 번째 열 (id 열)은 숫자형으로 정렬
-            //    {
-            //        int id1 = int.Parse(((ListViewItem)x).SubItems[col].Text);
-            //        int id2 = int.Parse(((ListViewItem)y).SubItems[col].Text);
-            //        returnVal = id1.CompareTo(id2);
-            //    }
-            //    else
-            //    {
-            //        returnVal = String.Compare(((ListViewItem)x).SubItems[col].Text,
-            //                                   ((ListViewItem)y).SubItems[col].Text);
-            //    }
-
-            //    if (order == SortOrder.Descending)
-            //        returnVal *= -1;
-
-            //    return returnVal;
-            //}
         }
 
         // 리스트뷰 항목 클릭 시 텍스트박스에 내용 출력
@@ -320,7 +290,6 @@ namespace testAPP
                 }
             }
         }
-
 
 
         // 수정 버튼 클릭 시
@@ -488,7 +457,7 @@ namespace testAPP
             }
         }
 
-        private void lv_list_SelectedIndexChanged_1(object sender, EventArgs e)
+        private void cb_column_CheckedChanged(object sender, EventArgs e)
         {
 
         }

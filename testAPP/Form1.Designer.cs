@@ -54,7 +54,6 @@
             this.lv_list.Size = new System.Drawing.Size(760, 214);
             this.lv_list.TabIndex = 5;
             this.lv_list.UseCompatibleStateImageBehavior = false;
-            this.lv_list.SelectedIndexChanged += new System.EventHandler(this.lv_list_SelectedIndexChanged_1);
             // 
             // bt_search
             // 
