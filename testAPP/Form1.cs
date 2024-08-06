@@ -189,11 +189,22 @@ namespace testAPP
 
             public int Compare(object x, object y)
             {
-                int returnVal = -1;
-                returnVal = String.Compare(((ListViewItem)x).SubItems[col].Text,
-                                            ((ListViewItem)y).SubItems[col].Text);
+                int returnVal;
+                if (col == 0) // 첫 번째 열 (id 열)은 숫자형으로 정렬
+                {
+                    int id1 = int.Parse(((ListViewItem)x).SubItems[col].Text);
+                    int id2 = int.Parse(((ListViewItem)y).SubItems[col].Text);
+                    returnVal = id1.CompareTo(id2);
+                }
+                else
+                {
+                    returnVal = String.Compare(((ListViewItem)x).SubItems[col].Text,
+                                               ((ListViewItem)y).SubItems[col].Text);
+                }
+
                 if (order == SortOrder.Descending)
                     returnVal *= -1;
+
                 return returnVal;
             }
         }
