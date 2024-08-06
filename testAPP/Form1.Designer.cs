@@ -40,6 +40,7 @@
             this.tb_description = new System.Windows.Forms.TextBox();
             this.tb_writer = new System.Windows.Forms.TextBox();
             this.bt_edit = new System.Windows.Forms.Button();
+            this.cb_column = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // lv_list
@@ -85,7 +86,7 @@
             // 
             this.tb_search.Location = new System.Drawing.Point(12, 12);
             this.tb_search.Name = "tb_search";
-            this.tb_search.Size = new System.Drawing.Size(679, 21);
+            this.tb_search.Size = new System.Drawing.Size(573, 21);
             this.tb_search.TabIndex = 6;
             // 
             // tb_title
@@ -139,11 +140,21 @@
             this.bt_edit.UseVisualStyleBackColor = true;
             this.bt_edit.Click += new System.EventHandler(this.bt_edit_Click);
             // 
+            // cb_column
+            // 
+            this.cb_column.FormattingEnabled = true;
+            this.cb_column.Location = new System.Drawing.Point(591, 15);
+            this.cb_column.Name = "cb_column";
+            this.cb_column.Size = new System.Drawing.Size(100, 20);
+            this.cb_column.TabIndex = 14;
+            this.cb_column.SelectedIndexChanged += new System.EventHandler(this.bt_edit_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 449);
+            this.Controls.Add(this.cb_column);
             this.Controls.Add(this.bt_edit);
             this.Controls.Add(this.tb_writer);
             this.Controls.Add(this.tb_description);
@@ -176,6 +187,7 @@
         private System.Windows.Forms.TextBox tb_description;
         private System.Windows.Forms.TextBox tb_writer;
         private System.Windows.Forms.Button bt_edit;
+        private System.Windows.Forms.ComboBox cb_column;
     }
 }
 
