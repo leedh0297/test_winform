@@ -285,7 +285,7 @@ namespace testAPP
         }
 
 
-        // 콤보박스 초기화
+        // 콤보박스 칼럼 검색
         private void SetupComboBox()
         {
             // 콤보박스 초기화
@@ -315,12 +315,12 @@ namespace testAPP
         }
 
         // 콤보박스 선택 항목 변경 시
-        private void cb_filter_SelectedIndexChanged(object sender, EventArgs e)
+        /*private void cb_filter_SelectedIndexChanged(object sender, EventArgs e)
         {
             string selectedColumn = cb_filter.SelectedItem.ToString(); // 선택된 콤보박스 항목
             string searchText = tb_search.Text.ToLower(); // 검색어를 소문자로 변환
             UpdateListView(selectedColumn, searchText); // ListView를 업데이트
-        }
+        }*/
 
         // ListView 업데이트
         private void UpdateListView(string filterColumn = "", string searchText = "")
