@@ -52,7 +52,7 @@
             this.lv_list.Location = new System.Drawing.Point(12, 41);
             this.lv_list.Name = "lv_list";
             this.lv_list.Size = new System.Drawing.Size(760, 214);
-            this.lv_list.TabIndex = 5;
+            this.lv_list.TabIndex = 8;
             this.lv_list.UseCompatibleStateImageBehavior = false;
             // 
             // bt_search
@@ -60,7 +60,7 @@
             this.bt_search.Location = new System.Drawing.Point(697, 12);
             this.bt_search.Name = "bt_search";
             this.bt_search.Size = new System.Drawing.Size(75, 23);
-            this.bt_search.TabIndex = 4;
+            this.bt_search.TabIndex = 7;
             this.bt_search.Text = "검색";
             this.bt_search.Click += new System.EventHandler(this.search_Click);
             // 
@@ -69,7 +69,7 @@
             this.bt_insert.Location = new System.Drawing.Point(12, 332);
             this.bt_insert.Name = "bt_insert";
             this.bt_insert.Size = new System.Drawing.Size(75, 23);
-            this.bt_insert.TabIndex = 2;
+            this.bt_insert.TabIndex = 13;
             this.bt_insert.Text = "삽입";
             this.bt_insert.UseVisualStyleBackColor = true;
             this.bt_insert.Click += new System.EventHandler(this.insert_Click);
@@ -79,7 +79,7 @@
             this.bt_delete.Location = new System.Drawing.Point(174, 332);
             this.bt_delete.Name = "bt_delete";
             this.bt_delete.Size = new System.Drawing.Size(75, 23);
-            this.bt_delete.TabIndex = 3;
+            this.bt_delete.TabIndex = 15;
             this.bt_delete.Text = "삭제";
             this.bt_delete.UseVisualStyleBackColor = true;
             this.bt_delete.Click += new System.EventHandler(this.bt_delete_Click);
@@ -89,14 +89,14 @@
             this.tb_search.Location = new System.Drawing.Point(12, 12);
             this.tb_search.Name = "tb_search";
             this.tb_search.Size = new System.Drawing.Size(573, 21);
-            this.tb_search.TabIndex = 6;
+            this.tb_search.TabIndex = 5;
             // 
             // tb_title
             // 
             this.tb_title.Location = new System.Drawing.Point(12, 305);
             this.tb_title.Name = "tb_title";
             this.tb_title.Size = new System.Drawing.Size(130, 21);
-            this.tb_title.TabIndex = 7;
+            this.tb_title.TabIndex = 9;
             this.tb_title.Text = "제목";
             // 
             // total_books
@@ -113,7 +113,7 @@
             this.tb_genre.Location = new System.Drawing.Point(284, 305);
             this.tb_genre.Name = "tb_genre";
             this.tb_genre.Size = new System.Drawing.Size(130, 21);
-            this.tb_genre.TabIndex = 9;
+            this.tb_genre.TabIndex = 11;
             this.tb_genre.Text = "장르";
             // 
             // tb_description
@@ -121,7 +121,7 @@
             this.tb_description.Location = new System.Drawing.Point(420, 305);
             this.tb_description.Name = "tb_description";
             this.tb_description.Size = new System.Drawing.Size(352, 21);
-            this.tb_description.TabIndex = 11;
+            this.tb_description.TabIndex = 12;
             this.tb_description.Text = "설명";
             // 
             // tb_writer
@@ -129,7 +129,7 @@
             this.tb_writer.Location = new System.Drawing.Point(148, 305);
             this.tb_writer.Name = "tb_writer";
             this.tb_writer.Size = new System.Drawing.Size(130, 21);
-            this.tb_writer.TabIndex = 12;
+            this.tb_writer.TabIndex = 10;
             this.tb_writer.Text = "작가";
             // 
             // bt_edit
@@ -137,7 +137,7 @@
             this.bt_edit.Location = new System.Drawing.Point(93, 332);
             this.bt_edit.Name = "bt_edit";
             this.bt_edit.Size = new System.Drawing.Size(75, 23);
-            this.bt_edit.TabIndex = 13;
+            this.bt_edit.TabIndex = 14;
             this.bt_edit.Text = "수정";
             this.bt_edit.UseVisualStyleBackColor = true;
             this.bt_edit.Click += new System.EventHandler(this.bt_edit_Click);
@@ -149,7 +149,7 @@
             this.cb_filter.Location = new System.Drawing.Point(591, 15);
             this.cb_filter.Name = "cb_filter";
             this.cb_filter.Size = new System.Drawing.Size(100, 20);
-            this.cb_filter.TabIndex = 14;
+            this.cb_filter.TabIndex = 6;
             // 
             // bt_refresh
             // 
@@ -158,7 +158,7 @@
             this.bt_refresh.Location = new System.Drawing.Point(697, 332);
             this.bt_refresh.Name = "bt_refresh";
             this.bt_refresh.Size = new System.Drawing.Size(75, 23);
-            this.bt_refresh.TabIndex = 15;
+            this.bt_refresh.TabIndex = 16;
             this.bt_refresh.Text = "새로고침";
             this.bt_refresh.UseVisualStyleBackColor = true;
             this.bt_refresh.Click += new System.EventHandler(this.bt_refresh_Click);
