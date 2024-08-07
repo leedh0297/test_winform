@@ -42,7 +42,6 @@
             this.bt_edit = new System.Windows.Forms.Button();
             this.cb_filter = new System.Windows.Forms.ComboBox();
             this.bt_refresh = new System.Windows.Forms.Button();
-            this.cb_column = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // lv_list
@@ -163,22 +162,11 @@
             this.bt_refresh.UseVisualStyleBackColor = true;
             this.bt_refresh.Click += new System.EventHandler(this.bt_refresh_Click);
             // 
-            // cb_column
-            // 
-            this.cb_column.AutoSize = true;
-            this.cb_column.Location = new System.Drawing.Point(644, 276);
-            this.cb_column.Name = "cb_column";
-            this.cb_column.Size = new System.Drawing.Size(128, 16);
-            this.cb_column.TabIndex = 13;
-            this.cb_column.Text = "검색한 칼럼만 출력";
-            this.cb_column.UseVisualStyleBackColor = true;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 449);
-            this.Controls.Add(this.cb_column);
             this.Controls.Add(this.bt_refresh);
             this.Controls.Add(this.cb_filter);
             this.Controls.Add(this.bt_edit);
@@ -215,7 +203,6 @@
         private System.Windows.Forms.Button bt_edit;
         private System.Windows.Forms.ComboBox cb_filter;
         private System.Windows.Forms.Button bt_refresh;
-        private System.Windows.Forms.CheckBox cb_column;
     }
 }
 
