@@ -13,8 +13,11 @@ namespace testAPP
         private SortOrder sortOrder = SortOrder.Ascending; // 정렬 순서
         private int sortColumn = -1; // 정렬할 컬럼의 인덱스
         private int selectedIndex = -1; // 선택된 항목의 인덱스를 저장할 변수
-
         private string connectionString = "Host=192.168.201.151;Username=postgres;Password=12345678;Database=internTest"; // PostgreSQL 연결 문자열
+
+        // 변경된 데이터를 추적하기 위한 리스트
+        private List<string[]> addedData = new List<string[]>();
+        private List<int> deletedIds = new List<int>();
 
         public Form1()
         {
@@ -123,31 +126,21 @@ namespace testAPP
                 return;
             }
 
-            using (var conn = new NpgsqlConnection(connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand("INSERT INTO book (title, writer, genre, description) VALUES (@title, @writer, @genre, @description)", conn))
-                {
-                    // 파라미터 설정
-                    cmd.Parameters.AddWithValue("title", title);
-                    cmd.Parameters.AddWithValue("writer", writer);
-                    cmd.Parameters.AddWithValue("genre", genre);
-                    cmd.Parameters.AddWithValue("description", description);
-                    cmd.ExecuteNonQuery(); // 쿼리 실행
-                }
-            }
+            string[] newRow = new string[] { "", title, writer, genre, description }; // 새로운 데이터를 추가
+            addedData.Add(newRow); // 새로운 데이터를 추가 리스트에 추가
 
-            // 데이터베이스에서 데이터 다시 로드
-            LoadDataFromDatabase();
-
-            // 전체 도서수 업데이트
-            total_books.Text = "전체 도서수 : " + data.Count.ToString();
+            // ListView에 추가
+            ListViewItem item = new ListViewItem(newRow);
+            lv_list.Items.Add(item);
 
             // 텍스트박스 초기화
             tb_title.Text = "";
             tb_writer.Text = "";
             tb_genre.Text = "";
             tb_description.Text = "";
+
+            // 전체 도서수 업데이트
+            total_books.Text = "전체 도서수 : " + (data.Count + addedData.Count).ToString();
         }
 
         // 리스트 칼럼 클릭 시 정렬
@@ -209,131 +202,72 @@ namespace testAPP
             }
         }
 
-        // 리스트뷰 항목 클릭 시 텍스트박스에 내용 출력
-        private void lv_list_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (lv_list.SelectedItems.Count > 0)
-            {
-                ListViewItem selectedItem = lv_list.SelectedItems[0]; // 선택된 항목
-                selectedIndex = lv_list.Items.IndexOf(selectedItem); // 선택된 항목의 인덱스 저장
-
-                // 선택된 필터 컬럼을 가져옴
-                string selectedColumn = cb_filter.SelectedItem.ToString();
-
-                // '전체'가 선택된 경우 또는 체크박스가 체크되지 않은 경우
-                if (selectedColumn == "전체" || !cb_column.Checked)
-                {
-                    // 모든 컬럼의 데이터를 텍스트박스에 출력
-                    for (int i = 1; i < lv_list.Columns.Count; i++)
-                    {
-                        switch (i)
-                        {
-                            case 1:
-                                tb_title.Text = selectedItem.SubItems[i].Text;
-                                break;
-                            case 2:
-                                tb_writer.Text = selectedItem.SubItems[i].Text;
-                                break;
-                            case 3:
-                                tb_genre.Text = selectedItem.SubItems[i].Text;
-                                break;
-                            case 4:
-                                tb_description.Text = selectedItem.SubItems[i].Text;
-                                break;
-                        }
-                    }
-                }
-                else
-                {
-                    // 체크박스가 체크되어 있고 '전체'가 아닌 다른 항목이 선택된 경우
-                    for (int i = 0; i < lv_list.Columns.Count; i++)
-                    {
-                        // 현재 컬럼이 필터 컬럼과 일치할 때만 텍스트박스에 값 설정
-                        if (lv_list.Columns[i].Text == selectedColumn)
-                        {
-                            switch (i)
-                            {
-                                case 1:
-                                    tb_title.Text = selectedItem.SubItems[i].Text;
-                                    break;
-                                case 2:
-                                    tb_writer.Text = selectedItem.SubItems[i].Text;
-                                    break;
-                                case 3:
-                                    tb_genre.Text = selectedItem.SubItems[i].Text;
-                                    break;
-                                case 4:
-                                    tb_description.Text = selectedItem.SubItems[i].Text;
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            // 필터 컬럼이 아닌 경우에는 텍스트박스를 비움
-                            switch (i)
-                            {
-                                case 1:
-                                    tb_title.Text = "";
-                                    break;
-                                case 2:
-                                    tb_writer.Text = "";
-                                    break;
-                                case 3:
-                                    tb_genre.Text = "";
-                                    break;
-                                case 4:
-                                    tb_description.Text = "";
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-
         // 수정 버튼 클릭 시
         private void bt_edit_Click(object sender, EventArgs e)
         {
             if (selectedIndex != -1)
             {
-                int id = int.Parse(lv_list.SelectedItems[0].SubItems[0].Text); // 선택된 항목의 ID
-                string title = tb_title.Text.Trim();
-                string writer = tb_writer.Text.Trim();
-                string genre = tb_genre.Text.Trim();
-                string description = tb_description.Text.Trim();
+                // 입력된 값을 읽음
+                string newTitle = tb_title.Text.Trim();
+                string newWriter = tb_writer.Text.Trim();
+                string newGenre = tb_genre.Text.Trim();
+                string newDescription = tb_description.Text.Trim();
 
-                using (var conn = new NpgsqlConnection(connectionString))
-                {
-                    conn.Open();
-                    using (var cmd = new NpgsqlCommand("UPDATE book SET title = @title, writer = @writer, genre = @genre, description = @description WHERE id = @id", conn))
-                    {
-                        // 파라미터 설정
-                        cmd.Parameters.AddWithValue("id", id);
-                        cmd.Parameters.AddWithValue("title", title);
-                        cmd.Parameters.AddWithValue("writer", writer);
-                        cmd.Parameters.AddWithValue("genre", genre);
-                        cmd.Parameters.AddWithValue("description", description);
-                        cmd.ExecuteNonQuery(); // 쿼리 실행
-                    }
-                }
-
-                // 데이터베이스에서 데이터 다시 로드
-                LoadDataFromDatabase();
-
-                // 선택된 항목 초기화
-                selectedIndex = -1;
-
-                // 텍스트박스 초기화
-                tb_title.Text = "";
-                tb_writer.Text = "";
-                tb_genre.Text = "";
-                tb_description.Text = "";
+                // 선택된 ListView 항목 업데이트
+                lv_list.SelectedItems[0].SubItems[1].Text = newTitle;
+                lv_list.SelectedItems[0].SubItems[2].Text = newWriter;
+                lv_list.SelectedItems[0].SubItems[3].Text = newGenre;
+                lv_list.SelectedItems[0].SubItems[4].Text = newDescription;
             }
             else
             {
                 MessageBox.Show("수정할 항목을 선택하세요.");
             }
+        }
+
+        // 적용 버튼 클릭 시
+        private void bt_apply_Click(object sender, EventArgs e)
+        {
+            // 삭제 항목을 데이터베이스에서 삭제
+            using (var conn = new NpgsqlConnection(connectionString))
+            {
+                conn.Open();
+                foreach (int id in deletedIds)
+                {
+                    using (var cmd = new NpgsqlCommand("DELETE FROM book WHERE id = @id", conn))
+                    {
+                        cmd.Parameters.AddWithValue("id", id);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+
+            // 추가 항목을 데이터베이스에 추가
+            using (var conn = new NpgsqlConnection(connectionString))
+            {
+                conn.Open();
+                foreach (var newRow in addedData)
+                {
+                    using (var cmd = new NpgsqlCommand("INSERT INTO book (title, writer, genre, description) VALUES (@title, @writer, @genre, @description)", conn))
+                    {
+                        cmd.Parameters.AddWithValue("title", newRow[1]);
+                        cmd.Parameters.AddWithValue("writer", newRow[2]);
+                        cmd.Parameters.AddWithValue("genre", newRow[3]);
+                        cmd.Parameters.AddWithValue("description", newRow[4]);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+
+            // 데이터베이스에서 데이터 다시 로드
+            LoadDataFromDatabase();
+
+            // 변경 사항 초기화
+            addedData.Clear();
+            deletedIds.Clear();
+
+            // 전체 도서수 업데이트
+            total_books.Text = "전체 도서수 : " + data.Count.ToString();
         }
 
         // 삭제 버튼 클릭 시
@@ -343,21 +277,11 @@ namespace testAPP
             {
                 int id = int.Parse(lv_list.SelectedItems[0].SubItems[0].Text); // 선택된 항목의 ID
 
-                using (var conn = new NpgsqlConnection(connectionString))
-                {
-                    conn.Open();
-                    using (var cmd = new NpgsqlCommand("DELETE FROM book WHERE id = @id", conn))
-                    {
-                        cmd.Parameters.AddWithValue("id", id);
-                        cmd.ExecuteNonQuery(); // 쿼리 실행
-                    }
-                }
+                // 삭제 항목을 데이터베이스에서 삭제하는 대신 삭제 리스트에 추가
+                deletedIds.Add(id);
 
-                // 데이터베이스에서 데이터 다시 로드
-                LoadDataFromDatabase();
-
-                // 전체 도서수 업데이트
-                total_books.Text = "전체 도서수 : " + data.Count.ToString();
+                // ListView에서 항목 삭제
+                lv_list.Items.RemoveAt(selectedIndex);
 
                 // 선택된 항목 초기화
                 selectedIndex = -1;
@@ -367,6 +291,9 @@ namespace testAPP
                 tb_writer.Text = "";
                 tb_genre.Text = "";
                 tb_description.Text = "";
+
+                // 전체 도서수 업데이트
+                total_books.Text = "전체 도서수 : " + (data.Count - deletedIds.Count).ToString();
             }
             else
             {
@@ -388,6 +315,12 @@ namespace testAPP
 
             // 검색어 텍스트박스 초기화
             tb_search.Text = "";
+
+            // 텍스트박스 초기화
+            tb_title.Text = "";
+            tb_writer.Text = "";
+            tb_genre.Text = "";
+            tb_description.Text = "";
         }
 
         // 콤보박스 초기화
@@ -457,9 +390,19 @@ namespace testAPP
             }
         }
 
-        private void cb_column_CheckedChanged(object sender, EventArgs e)
+        // 리스트뷰 항목 선택 이벤트 핸들러 추가
+        private void lv_list_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (lv_list.SelectedItems.Count > 0)
+            {
+                selectedIndex = lv_list.SelectedIndices[0]; // 선택된 항목의 인덱스 저장
 
+                // 선택된 항목의 텍스트박스를 업데이트
+                tb_title.Text = lv_list.SelectedItems[0].SubItems[1].Text;
+                tb_writer.Text = lv_list.SelectedItems[0].SubItems[2].Text;
+                tb_genre.Text = lv_list.SelectedItems[0].SubItems[3].Text;
+                tb_description.Text = lv_list.SelectedItems[0].SubItems[4].Text;
+            }
         }
     }
 }

@@ -42,7 +42,7 @@
             this.bt_edit = new System.Windows.Forms.Button();
             this.cb_filter = new System.Windows.Forms.ComboBox();
             this.bt_refresh = new System.Windows.Forms.Button();
-            this.cb_column = new System.Windows.Forms.CheckBox();
+            this.bt_apply = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lv_list
@@ -54,6 +54,8 @@
             this.lv_list.Size = new System.Drawing.Size(760, 214);
             this.lv_list.TabIndex = 5;
             this.lv_list.UseCompatibleStateImageBehavior = false;
+            this.lv_list.View = System.Windows.Forms.View.Details;
+            this.lv_list.SelectedIndexChanged += new System.EventHandler(this.lv_list_SelectedIndexChanged);
             // 
             // bt_search
             // 
@@ -163,22 +165,22 @@
             this.bt_refresh.UseVisualStyleBackColor = true;
             this.bt_refresh.Click += new System.EventHandler(this.bt_refresh_Click);
             // 
-            // cb_column
+            // bt_apply
             // 
-            this.cb_column.AutoSize = true;
-            this.cb_column.Location = new System.Drawing.Point(644, 276);
-            this.cb_column.Name = "cb_column";
-            this.cb_column.Size = new System.Drawing.Size(128, 16);
-            this.cb_column.TabIndex = 16;
-            this.cb_column.Text = "검색한 칼럼만 출력";
-            this.cb_column.UseVisualStyleBackColor = true;
+            this.bt_apply.Location = new System.Drawing.Point(697, 414);
+            this.bt_apply.Name = "bt_apply";
+            this.bt_apply.Size = new System.Drawing.Size(75, 23);
+            this.bt_apply.TabIndex = 16;
+            this.bt_apply.Text = "적용";
+            this.bt_apply.UseVisualStyleBackColor = true;
+            this.bt_apply.Click += new System.EventHandler(this.bt_apply_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 449);
-            this.Controls.Add(this.cb_column);
+            this.Controls.Add(this.bt_apply);
             this.Controls.Add(this.bt_refresh);
             this.Controls.Add(this.cb_filter);
             this.Controls.Add(this.bt_edit);
@@ -215,7 +217,7 @@
         private System.Windows.Forms.Button bt_edit;
         private System.Windows.Forms.ComboBox cb_filter;
         private System.Windows.Forms.Button bt_refresh;
-        private System.Windows.Forms.CheckBox cb_column;
+        private System.Windows.Forms.Button bt_apply;
     }
 }
 
