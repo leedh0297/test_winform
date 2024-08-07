@@ -218,4 +218,3 @@
         private System.Windows.Forms.Button bt_apply;
     }
 }
-
