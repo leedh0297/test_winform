@@ -10,6 +10,7 @@ namespace testAPP
     public partial class Form1 : Form
     {
         private List<string[]> data = new List<string[]>(); // 데이터를 저장할 리스트
+        private List<string> changes = new List<string>(); // 변경 내역을 저장할 리스트
         private SortOrder sortOrder = SortOrder.Ascending; // 정렬 순서
         private int sortColumn = -1; // 정렬할 컬럼의 인덱스
         private int selectedIndex = -1; // 선택된 항목의 인덱스를 저장할 변수
@@ -99,6 +100,7 @@ namespace testAPP
             UpdateListView(); // ListView를 업데이트
         }
 
+
         // 검색 버튼 클릭 시
         private void search_Click(object sender, EventArgs e)
         {
@@ -115,7 +117,6 @@ namespace testAPP
             string genre = tb_genre.Text.Trim();
             string description = tb_description.Text.Trim();
 
-            // 모든 텍스트박스가 빈칸이면 추가하지 않음
             if (string.IsNullOrEmpty(title) && string.IsNullOrEmpty(writer) &&
                 string.IsNullOrEmpty(genre) && string.IsNullOrEmpty(description))
             {
@@ -123,32 +124,23 @@ namespace testAPP
                 return;
             }
 
-            using (var conn = new NpgsqlConnection(connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand("INSERT INTO book (title, writer, genre, description) VALUES (@title, @writer, @genre, @description)", conn))
-                {
-                    // 파라미터 설정
-                    cmd.Parameters.AddWithValue("title", title);
-                    cmd.Parameters.AddWithValue("writer", writer);
-                    cmd.Parameters.AddWithValue("genre", genre);
-                    cmd.Parameters.AddWithValue("description", description);
-                    cmd.ExecuteNonQuery(); // 쿼리 실행
-                }
-            }
+            // 메모리에 삽입 작업 추가
+            string newRow = $"{title},{writer},{genre},{description}";
+            changes.Add($"INSERT INTO book (title, writer, genre, description) VALUES ('{title}', '{writer}', '{genre}', '{description}')");
 
-            // 데이터베이스에서 데이터 다시 로드
-            LoadDataFromDatabase();
+            // 새 항목을 ListView에 추가
+            string[] row = new string[] { "", title, writer, genre, description };
+            data.Add(row);
+            UpdateListView();
 
-            // 전체 도서수 업데이트
             total_books.Text = "전체 도서수 : " + data.Count.ToString();
-
-            // 텍스트박스 초기화
             tb_title.Text = "";
             tb_writer.Text = "";
             tb_genre.Text = "";
             tb_description.Text = "";
         }
+
+
 
         // 리스트 칼럼 클릭 시 정렬
         private void list_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -209,7 +201,6 @@ namespace testAPP
             }
         }
 
-
         // 수정 버튼 클릭 시
         private void bt_edit_Click(object sender, EventArgs e)
         {
@@ -229,53 +220,25 @@ namespace testAPP
                 string oldGenre = lv_list.SelectedItems[0].SubItems[3].Text;
                 string oldDescription = lv_list.SelectedItems[0].SubItems[4].Text;
 
-                // 변경된 값을 저장할 리스트
                 List<string> updates = new List<string>();
-                List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
 
-                if (newTitle != oldTitle)
-                {
-                    updates.Add("title = @title");
-                    parameters.Add(new NpgsqlParameter("title", newTitle));
-                }
-                if (newWriter != oldWriter)
-                {
-                    updates.Add("writer = @writer");
-                    parameters.Add(new NpgsqlParameter("writer", newWriter));
-                }
-                if (newGenre != oldGenre)
-                {
-                    updates.Add("genre = @genre");
-                    parameters.Add(new NpgsqlParameter("genre", newGenre));
-                }
-                if (newDescription != oldDescription)
-                {
-                    updates.Add("description = @description");
-                    parameters.Add(new NpgsqlParameter("description", newDescription));
-                }
+                if (newTitle != oldTitle) updates.Add($"title='{newTitle}'");
+                if (newWriter != oldWriter) updates.Add($"writer='{newWriter}'");
+                if (newGenre != oldGenre) updates.Add($"genre='{newGenre}'");
+                if (newDescription != oldDescription) updates.Add($"description='{newDescription}'");
 
                 if (updates.Count > 0)
                 {
-                    string updateQuery = "UPDATE book SET " + string.Join(", ", updates) + " WHERE id = @id";
-                    parameters.Add(new NpgsqlParameter("id", id));
+                    // 메모리에 수정 작업 추가
+                    string updateQuery = $"UPDATE book SET {string.Join(", ", updates)} WHERE id={id}";
+                    changes.Add(updateQuery);
 
-                    using (var conn = new NpgsqlConnection(connectionString))
-                    {
-                        conn.Open();
-                        using (var cmd = new NpgsqlCommand(updateQuery, conn))
-                        {
-                            cmd.Parameters.AddRange(parameters.ToArray());
-                            cmd.ExecuteNonQuery(); // 쿼리 실행
-                        }
-                    }
+                    lv_list.SelectedItems[0].SubItems[1].Text = newTitle;
+                    lv_list.SelectedItems[0].SubItems[2].Text = newWriter;
+                    lv_list.SelectedItems[0].SubItems[3].Text = newGenre;
+                    lv_list.SelectedItems[0].SubItems[4].Text = newDescription;
 
-                    // 데이터베이스에서 데이터 다시 로드
-                    LoadDataFromDatabase();
-
-                    // 선택된 항목 초기화
                     selectedIndex = -1;
-
-                    // 텍스트박스 초기화
                     tb_title.Text = "";
                     tb_writer.Text = "";
                     tb_genre.Text = "";
@@ -300,26 +263,16 @@ namespace testAPP
             {
                 int id = int.Parse(lv_list.SelectedItems[0].SubItems[0].Text); // 선택된 항목의 ID
 
-                using (var conn = new NpgsqlConnection(connectionString))
-                {
-                    conn.Open();
-                    using (var cmd = new NpgsqlCommand("DELETE FROM book WHERE id = @id", conn))
-                    {
-                        cmd.Parameters.AddWithValue("id", id);
-                        cmd.ExecuteNonQuery(); // 쿼리 실행
-                    }
-                }
+                // 메모리에 삭제 작업 추가
+                changes.Add($"DELETE FROM book WHERE id={id}");
 
-                // 데이터베이스에서 데이터 다시 로드
-                LoadDataFromDatabase();
+                // 데이터 삭제
+                lv_list.Items.RemoveAt(selectedIndex);
+                data.RemoveAt(selectedIndex);
 
-                // 전체 도서수 업데이트
                 total_books.Text = "전체 도서수 : " + data.Count.ToString();
 
-                // 선택된 항목 초기화
                 selectedIndex = -1;
-
-                // 텍스트박스 초기화
                 tb_title.Text = "";
                 tb_writer.Text = "";
                 tb_genre.Text = "";
@@ -331,27 +284,6 @@ namespace testAPP
             }
         }
 
-        // 새로고침 버튼 클릭 시
-        private void bt_refresh_Click(object sender, EventArgs e)
-        {
-            // 데이터베이스에서 데이터 다시 로드
-            LoadDataFromDatabase();
-
-            // 전체 도서수 업데이트
-            total_books.Text = "전체 도서수 : " + data.Count.ToString();
-
-            // 콤보박스를 '전체'로 설정
-            cb_filter.SelectedIndex = 0;
-
-            // 검색어 텍스트박스 초기화
-            tb_search.Text = "";
-
-            // 텍스트박스 초기화
-            tb_title.Text = "";
-            tb_writer.Text = "";
-            tb_genre.Text = "";
-            tb_description.Text = "";
-        }
 
         // 콤보박스 초기화
         private void SetupComboBox()
@@ -420,6 +352,7 @@ namespace testAPP
             }
         }
 
+
         // 리스트뷰 항목 선택 이벤트 핸들러 추가
         private void lv_list_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -434,5 +367,46 @@ namespace testAPP
                 tb_description.Text = lv_list.SelectedItems[0].SubItems[4].Text;
             }
         }
+
+        // 적용 버튼 클릭 시
+        private void bt_apply_Click(object sender, EventArgs e)
+        {
+            using (var conn = new NpgsqlConnection(connectionString))
+            {
+                conn.Open();
+                foreach (string change in changes)
+                {
+                    using (var cmd = new NpgsqlCommand(change, conn))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            changes.Clear();
+            LoadDataFromDatabase();
+        }
+
+
+        private void bt_refresh_Click(object sender, EventArgs e)
+        {
+            // 데이터베이스에서 최신 데이터 로드
+            LoadDataFromDatabase();
+
+            // 전체 도서 수 업데이트
+            total_books.Text = "전체 도서수 : " + data.Count.ToString();
+
+            // 텍스트 박스 및 선택된 항목 초기화
+            tb_title.Text = "";
+            tb_writer.Text = "";
+            tb_genre.Text = "";
+            tb_description.Text = "";
+
+            // 선택된 항목 초기화
+            selectedIndex = -1;
+
+            // ListView 업데이트
+            UpdateListView();
+        }
+
     }
 }
