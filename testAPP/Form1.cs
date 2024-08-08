@@ -14,6 +14,7 @@ namespace testAPP
         private SortOrder sortOrder = SortOrder.Ascending; // 정렬 순서
         private int sortColumn = -1; // 정렬할 컬럼의 인덱스
         private int selectedIndex = -1; // 선택된 항목의 인덱스를 저장할 변수
+        private int tempIdCounter = 0; // 임시 ID를 위한 카운터
 
         private string connectionString = "Host=192.168.201.151;Username=postgres;Password=12345678;Database=internTest"; // PostgreSQL 연결 문자열
 
@@ -124,12 +125,14 @@ namespace testAPP
                 return;
             }
 
+            // 임시 ID 생성
+            string tempId = GenerateTempId();
+
             // 메모리에 삽입 작업 추가
-            string newRow = $"{title},{writer},{genre},{description}";
             changes.Add($"INSERT INTO book (title, writer, genre, description) VALUES ('{title}', '{writer}', '{genre}', '{description}')");
 
             // 새 항목을 ListView에 추가
-            string[] row = new string[] { "", title, writer, genre, description };
+            string[] row = new string[] { tempId, title, writer, genre, description };
             data.Add(row);
             UpdateListView();
 
@@ -140,7 +143,12 @@ namespace testAPP
             tb_description.Text = "";
         }
 
-
+        // 임시 ID 생성 함수
+        private string GenerateTempId()
+        {
+            // A, B, C 등의 임시 ID를 생성
+            return ((char)('A' + tempIdCounter++)).ToString();
+        }
 
         // 리스트 칼럼 클릭 시 정렬
         private void list_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -184,9 +192,25 @@ namespace testAPP
                 int returnVal;
                 if (col == 0) // 첫 번째 열 (id 열)은 숫자형으로 정렬
                 {
-                    int id1 = int.Parse(((ListViewItem)x).SubItems[col].Text);
-                    int id2 = int.Parse(((ListViewItem)y).SubItems[col].Text);
-                    returnVal = id1.CompareTo(id2);
+                    bool isTempId1 = !int.TryParse(((ListViewItem)x).SubItems[col].Text, out int id1);
+                    bool isTempId2 = !int.TryParse(((ListViewItem)y).SubItems[col].Text, out int id2);
+
+                    if (isTempId1 && isTempId2)
+                    {
+                        returnVal = String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
+                    }
+                    else if (isTempId1)
+                    {
+                        returnVal = 1; // Temp ID goes after real ID
+                    }
+                    else if (isTempId2)
+                    {
+                        returnVal = -1; // Real ID goes before temp ID
+                    }
+                    else
+                    {
+                        returnVal = id1.CompareTo(id2);
+                    }
                 }
                 else
                 {
@@ -206,7 +230,7 @@ namespace testAPP
         {
             if (selectedIndex != -1)
             {
-                int id = int.Parse(lv_list.SelectedItems[0].SubItems[0].Text); // 선택된 항목의 ID
+                string id = lv_list.SelectedItems[0].SubItems[0].Text; // 선택된 항목의 ID
 
                 // 입력된 값을 읽음
                 string newTitle = tb_title.Text.Trim();
@@ -261,7 +285,7 @@ namespace testAPP
         {
             if (selectedIndex != -1)
             {
-                int id = int.Parse(lv_list.SelectedItems[0].SubItems[0].Text); // 선택된 항목의 ID
+                string id = lv_list.SelectedItems[0].SubItems[0].Text; // 선택된 항목의 ID
 
                 // 메모리에 삭제 작업 추가
                 changes.Add($"DELETE FROM book WHERE id={id}");
@@ -386,7 +410,7 @@ namespace testAPP
             LoadDataFromDatabase();
         }
 
-
+        //새로고침
         private void bt_refresh_Click(object sender, EventArgs e)
         {
             // 데이터베이스에서 최신 데이터 로드
