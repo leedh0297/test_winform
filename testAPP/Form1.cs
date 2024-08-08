@@ -15,6 +15,7 @@ namespace testAPP
         private int sortColumn = -1; // 정렬할 컬럼의 인덱스
         private int selectedIndex = -1; // 선택된 항목의 인덱스를 저장할 변수
         private int tempIdCounter = 0; // 임시 ID를 위한 카운터
+        private bool isUpdatingFromListView = false; // 리스트뷰에서 텍스트박스를 업데이트 중인지 여부
 
         private string connectionString = "Host=192.168.201.151;Username=postgres;Password=12345678;Database=internTest"; // PostgreSQL 연결 문자열
 
@@ -397,6 +398,8 @@ namespace testAPP
         {
             if (lv_list.SelectedItems.Count > 0)
             {
+                isUpdatingFromListView = true; // 리스트뷰에서 업데이트 시작
+
                 selectedIndex = lv_list.SelectedIndices[0]; // 선택된 항목의 인덱스 저장
 
                 // 선택된 항목의 텍스트박스를 업데이트
@@ -404,6 +407,8 @@ namespace testAPP
                 tb_writer.Text = lv_list.SelectedItems[0].SubItems[2].Text;
                 tb_genre.Text = lv_list.SelectedItems[0].SubItems[3].Text;
                 tb_description.Text = lv_list.SelectedItems[0].SubItems[4].Text;
+
+                isUpdatingFromListView = false; // 리스트뷰에서 업데이트 종료
             }
         }
 
@@ -462,14 +467,17 @@ namespace testAPP
         // 텍스트박스 TextChanged 이벤트 핸들러
         private void tb_TextChanged(object sender, EventArgs e)
         {
-            if (sender == tb_title)
-                title_label.Text = "Title*";
-            else if (sender == tb_writer)
-                writer_label.Text = "Writer*";
-            else if (sender == tb_genre)
-                genre_label.Text = "Genre*";
-            else if (sender == tb_description)
-                description_label.Text = "Description*";
+            if (!isUpdatingFromListView) // 리스트뷰에서 업데이트 중이 아닐 때만 별표 추가
+            {
+                if (sender == tb_title)
+                    title_label.Text = "Title*";
+                else if (sender == tb_writer)
+                    writer_label.Text = "Writer*";
+                else if (sender == tb_genre)
+                    genre_label.Text = "Genre*";
+                else if (sender == tb_description)
+                    description_label.Text = "Description*";
+            }
         }
 
         // 라벨 별표 제거 함수
