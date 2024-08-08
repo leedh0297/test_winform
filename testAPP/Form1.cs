@@ -39,6 +39,15 @@ namespace testAPP
 
             // SelectedIndexChanged 이벤트 핸들러 추가
             lv_list.SelectedIndexChanged += new EventHandler(lv_list_SelectedIndexChanged);
+
+            // 결과 보고 라벨 업데이트
+            results_report.Text = "데이터를 불러왔습니다.";
+
+            // 텍스트박스 TextChanged 이벤트 핸들러 추가
+            tb_title.TextChanged += new EventHandler(tb_TextChanged);
+            tb_writer.TextChanged += new EventHandler(tb_TextChanged);
+            tb_genre.TextChanged += new EventHandler(tb_TextChanged);
+            tb_description.TextChanged += new EventHandler(tb_TextChanged);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -101,7 +110,6 @@ namespace testAPP
             UpdateListView(); // ListView를 업데이트
         }
 
-
         // 검색 버튼 클릭 시
         private void search_Click(object sender, EventArgs e)
         {
@@ -141,6 +149,12 @@ namespace testAPP
             tb_writer.Text = "";
             tb_genre.Text = "";
             tb_description.Text = "";
+
+            // 결과 보고 라벨 업데이트
+            results_report.Text = "데이터가 삽입되었습니다.";
+
+            // 별표 제거
+            ResetLabels();
         }
 
         // 임시 ID 생성 함수
@@ -277,8 +291,13 @@ namespace testAPP
             {
                 MessageBox.Show("수정할 항목을 선택하세요.");
             }
-        }
 
+            // 결과 보고 라벨 업데이트
+            results_report.Text = "데이터가 수정되었습니다.";
+
+            // 별표 제거
+            ResetLabels();
+        }
 
         // 삭제 버튼 클릭 시
         private void bt_delete_Click(object sender, EventArgs e)
@@ -306,8 +325,13 @@ namespace testAPP
             {
                 MessageBox.Show("삭제할 항목을 선택하세요.");
             }
-        }
 
+            // 결과 보고 라벨 업데이트
+            results_report.Text = "데이터가 삭제되었습니다.";
+
+            // 별표 제거
+            ResetLabels();
+        }
 
         // 콤보박스 칼럼 검색
         private void SetupComboBox()
@@ -338,14 +362,6 @@ namespace testAPP
             cb_filter.SelectedIndex = 0; // 기본 설정은 '전체'
         }
 
-        // 콤보박스 선택 항목 변경 시
-        /*private void cb_filter_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string selectedColumn = cb_filter.SelectedItem.ToString(); // 선택된 콤보박스 항목
-            string searchText = tb_search.Text.ToLower(); // 검색어를 소문자로 변환
-            UpdateListView(selectedColumn, searchText); // ListView를 업데이트
-        }*/
-
         // ListView 업데이트
         private void UpdateListView(string filterColumn = "", string searchText = "")
         {
@@ -375,7 +391,6 @@ namespace testAPP
                 }
             }
         }
-
 
         // 리스트뷰 항목 선택 이벤트 핸들러 추가
         private void lv_list_SelectedIndexChanged(object sender, EventArgs e)
@@ -408,9 +423,15 @@ namespace testAPP
             }
             changes.Clear();
             LoadDataFromDatabase();
+
+            // 결과 보고 라벨 업데이트
+            results_report.Text = "데이터베이스에 저장되었습니다.";
+
+            // 별표 제거
+            ResetLabels();
         }
 
-        //새로고침
+        // 새로고침 버튼 클릭 시
         private void bt_refresh_Click(object sender, EventArgs e)
         {
             // 데이터베이스에서 최신 데이터 로드
@@ -430,7 +451,34 @@ namespace testAPP
 
             // ListView 업데이트
             UpdateListView();
+
+            // 결과 보고 라벨 업데이트
+            results_report.Text = "데이터를 새로 고침 했습니다.";
+
+            // 별표 제거
+            ResetLabels();
         }
 
+        // 텍스트박스 TextChanged 이벤트 핸들러
+        private void tb_TextChanged(object sender, EventArgs e)
+        {
+            if (sender == tb_title)
+                title_label.Text = "Title*";
+            else if (sender == tb_writer)
+                writer_label.Text = "Writer*";
+            else if (sender == tb_genre)
+                genre_label.Text = "Genre*";
+            else if (sender == tb_description)
+                description_label.Text = "Description*";
+        }
+
+        // 라벨 별표 제거 함수
+        private void ResetLabels()
+        {
+            title_label.Text = "Title";
+            writer_label.Text = "Writer";
+            genre_label.Text = "Genre";
+            description_label.Text = "Description";
+        }
     }
 }

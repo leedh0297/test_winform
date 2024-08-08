@@ -43,6 +43,11 @@
             this.cb_filter = new System.Windows.Forms.ComboBox();
             this.bt_refresh = new System.Windows.Forms.Button();
             this.bt_apply = new System.Windows.Forms.Button();
+            this.results_report = new System.Windows.Forms.Label();
+            this.title_label = new System.Windows.Forms.Label();
+            this.writer_label = new System.Windows.Forms.Label();
+            this.genre_label = new System.Windows.Forms.Label();
+            this.description_label = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lv_list
@@ -93,7 +98,8 @@
             // 
             // tb_title
             // 
-            this.tb_title.Location = new System.Drawing.Point(12, 305);
+            this.tb_title.BackColor = System.Drawing.SystemColors.Window;
+            this.tb_title.Location = new System.Drawing.Point(12, 303);
             this.tb_title.Name = "tb_title";
             this.tb_title.Size = new System.Drawing.Size(130, 21);
             this.tb_title.TabIndex = 9;
@@ -102,7 +108,7 @@
             // total_books
             // 
             this.total_books.AutoSize = true;
-            this.total_books.Location = new System.Drawing.Point(23, 276);
+            this.total_books.Location = new System.Drawing.Point(14, 267);
             this.total_books.Name = "total_books";
             this.total_books.Size = new System.Drawing.Size(65, 12);
             this.total_books.TabIndex = 8;
@@ -173,11 +179,62 @@
             this.bt_apply.UseVisualStyleBackColor = true;
             this.bt_apply.Click += new System.EventHandler(this.bt_apply_Click);
             // 
+            // results_report
+            // 
+            this.results_report.AutoSize = true;
+            this.results_report.BackColor = System.Drawing.SystemColors.Control;
+            this.results_report.Location = new System.Drawing.Point(23, 419);
+            this.results_report.Name = "results_report";
+            this.results_report.Size = new System.Drawing.Size(29, 12);
+            this.results_report.TabIndex = 18;
+            this.results_report.Text = "결과";
+            // 
+            // title_label
+            // 
+            this.title_label.AutoSize = true;
+            this.title_label.Location = new System.Drawing.Point(14, 290);
+            this.title_label.Name = "title_label";
+            this.title_label.Size = new System.Drawing.Size(29, 12);
+            this.title_label.TabIndex = 19;
+            this.title_label.Text = "Title";
+            // 
+            // writer_label
+            // 
+            this.writer_label.AutoSize = true;
+            this.writer_label.Location = new System.Drawing.Point(148, 290);
+            this.writer_label.Name = "writer_label";
+            this.writer_label.Size = new System.Drawing.Size(36, 12);
+            this.writer_label.TabIndex = 20;
+            this.writer_label.Text = "Writer";
+            // 
+            // genre_label
+            // 
+            this.genre_label.AutoSize = true;
+            this.genre_label.Location = new System.Drawing.Point(284, 290);
+            this.genre_label.Name = "genre_label";
+            this.genre_label.Size = new System.Drawing.Size(39, 12);
+            this.genre_label.TabIndex = 21;
+            this.genre_label.Text = "Genre";
+            // 
+            // description_label
+            // 
+            this.description_label.AutoSize = true;
+            this.description_label.Location = new System.Drawing.Point(418, 290);
+            this.description_label.Name = "description_label";
+            this.description_label.Size = new System.Drawing.Size(68, 12);
+            this.description_label.TabIndex = 22;
+            this.description_label.Text = "Description";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 449);
+            this.Controls.Add(this.description_label);
+            this.Controls.Add(this.genre_label);
+            this.Controls.Add(this.writer_label);
+            this.Controls.Add(this.title_label);
+            this.Controls.Add(this.results_report);
             this.Controls.Add(this.bt_apply);
             this.Controls.Add(this.bt_refresh);
             this.Controls.Add(this.cb_filter);
@@ -216,5 +273,10 @@
         private System.Windows.Forms.ComboBox cb_filter;
         private System.Windows.Forms.Button bt_refresh;
         private System.Windows.Forms.Button bt_apply;
+        private System.Windows.Forms.Label results_report;
+        private System.Windows.Forms.Label title_label;
+        private System.Windows.Forms.Label writer_label;
+        private System.Windows.Forms.Label genre_label;
+        private System.Windows.Forms.Label description_label;
     }
 }
