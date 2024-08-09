@@ -49,7 +49,6 @@
             this.labelWriter = new System.Windows.Forms.Label();
             this.labelGenre = new System.Windows.Forms.Label();
             this.labelDescription = new System.Windows.Forms.Label();
-            this.statusStrip2 = new System.Windows.Forms.StatusStrip();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -232,20 +231,11 @@
             this.labelDescription.TabIndex = 18;
             this.labelDescription.Text = "Description";
             // 
-            // statusStrip2
-            // 
-            this.statusStrip2.Location = new System.Drawing.Point(0, 427);
-            this.statusStrip2.Name = "statusStrip2";
-            this.statusStrip2.Size = new System.Drawing.Size(784, 22);
-            this.statusStrip2.TabIndex = 19;
-            this.statusStrip2.Text = "statusStrip2";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 449);
-            this.Controls.Add(this.statusStrip2);
             this.Controls.Add(this.labelDescription);
             this.Controls.Add(this.labelGenre);
             this.Controls.Add(this.labelWriter);
@@ -297,7 +287,6 @@
         private System.Windows.Forms.Label labelWriter;
         private System.Windows.Forms.Label labelGenre;
         private System.Windows.Forms.Label labelDescription;
-        private System.Windows.Forms.StatusStrip statusStrip2;
     }
 }
 
