@@ -234,12 +234,12 @@ namespace testAPP
                 }
             }
 
-            // Update ListView
+            //ListView 업데이트
             string[] row = new string[] { tempId, title, writer, genre, description };
             data.Add(row);
             UpdateListView();
 
-            // Update UI
+            //텍스트박스 초기화
             total_books.Text = "전체 도서수 : " + data.Count.ToString();
             tb_title.Text = "";
             tb_writer.Text = "";
@@ -281,30 +281,36 @@ namespace testAPP
                 {
                     if (id.Contains("*"))
                     {
-                        // 임시 데이터인 경우 삽입 쿼리 생성
-                        string insertQuery = $"INSERT INTO book (title, writer, genre, description) VALUES ('{newTitle}', '{newWriter}', '{newGenre}', '{newDescription}')";
-                        changes.Add(insertQuery);
+                        // 임시 데이터인 경우 기존 임시 데이터를 삭제하고 새 임시 데이터를 추가
+                        data.RemoveAt(selectedIndex);
+                        lv_list.Items.RemoveAt(selectedIndex);
 
-                        // 임시 ID 갱신 (새로운 임시 ID)
-                        lv_list.SelectedItems[0].SubItems[0].Text = GenerateTempId();
+                        string[] newRow = new string[] { GenerateTempId(), newTitle, newWriter, newGenre, newDescription };
+                        data.Add(newRow);
+                        UpdateListView();
                     }
                     else
                     {
                         // 데이터베이스에 있는 데이터인 경우 수정 쿼리 생성
                         string updateQuery = $"UPDATE book SET {string.Join(", ", updates)} WHERE id={id}";
                         changes.Add(updateQuery);
+
+                        // ListView 업데이트
+                        lv_list.SelectedItems[0].SubItems[1].Text = newTitle;
+                        lv_list.SelectedItems[0].SubItems[2].Text = newWriter;
+                        lv_list.SelectedItems[0].SubItems[3].Text = newGenre;
+                        lv_list.SelectedItems[0].SubItems[4].Text = newDescription;
                     }
 
-                    lv_list.SelectedItems[0].SubItems[1].Text = newTitle;
-                    lv_list.SelectedItems[0].SubItems[2].Text = newWriter;
-                    lv_list.SelectedItems[0].SubItems[3].Text = newGenre;
-                    lv_list.SelectedItems[0].SubItems[4].Text = newDescription;
-
+                    // 텍스트박스 초기화
                     selectedIndex = -1;
                     tb_title.Text = "";
                     tb_writer.Text = "";
                     tb_genre.Text = "";
                     tb_description.Text = "";
+
+                    // 결과 보고 라벨 업데이트
+                    results_report.Text = "데이터가 수정되었습니다.";
                 }
                 else
                 {
@@ -316,12 +322,10 @@ namespace testAPP
                 MessageBox.Show("수정할 항목을 선택하세요.");
             }
 
-            // 결과 보고 라벨 업데이트
-            results_report.Text = "데이터가 수정되었습니다.";
-
             // 별표 제거
             ResetLabels();
         }
+
 
 
         // 삭제 버튼 클릭 시
