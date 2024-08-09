@@ -14,7 +14,7 @@ namespace testAPP
         private SortOrder sortOrder = SortOrder.Ascending; // 정렬 순서
         private int sortColumn = -1; // 정렬할 컬럼의 인덱스
         private int selectedIndex = -1; // 선택된 항목의 인덱스를 저장할 변수
-        private int tempIdCounter = 0; // 임시 ID를 위한 카운터
+        private int tempIdCounter = 1; // 임시 ID를 위한 카운터
         private bool isUpdatingFromListView = false; // 리스트뷰에서 텍스트박스를 업데이트 중인지 여부
 
         private string connectionString = "Host=192.168.201.151;Username=postgres;Password=12345678;Database=internTest"; // PostgreSQL 연결 문자열
@@ -119,50 +119,11 @@ namespace testAPP
             UpdateListView(selectedColumn, searchText); // ListView를 업데이트
         }
 
-        // 삽입 버튼 클릭 시
-        private void insert_Click(object sender, EventArgs e)
-        {
-            string title = tb_title.Text.Trim();
-            string writer = tb_writer.Text.Trim();
-            string genre = tb_genre.Text.Trim();
-            string description = tb_description.Text.Trim();
-
-            if (string.IsNullOrEmpty(title) && string.IsNullOrEmpty(writer) &&
-                string.IsNullOrEmpty(genre) && string.IsNullOrEmpty(description))
-            {
-                MessageBox.Show("모든 항목이 빈칸일 수 없습니다.");
-                return;
-            }
-
-            // 임시 ID 생성
-            string tempId = GenerateTempId();
-
-            // 메모리에 삽입 작업 추가
-            changes.Add($"INSERT INTO book (title, writer, genre, description) VALUES ('{title}', '{writer}', '{genre}', '{description}')");
-
-            // 새 항목을 ListView에 추가
-            string[] row = new string[] { tempId, title, writer, genre, description };
-            data.Add(row);
-            UpdateListView();
-
-            total_books.Text = "전체 도서수 : " + data.Count.ToString();
-            tb_title.Text = "";
-            tb_writer.Text = "";
-            tb_genre.Text = "";
-            tb_description.Text = "";
-
-            // 결과 보고 라벨 업데이트
-            results_report.Text = "데이터가 삽입되었습니다.";
-
-            // 별표 제거
-            ResetLabels();
-        }
-
         // 임시 ID 생성 함수
         private string GenerateTempId()
         {
             // A, B, C 등의 임시 ID를 생성
-            return ((char)('A' + tempIdCounter++)).ToString();
+            return (tempIdCounter++ + "*").ToString();
         }
 
         // 리스트 칼럼 클릭 시 정렬
@@ -240,6 +201,56 @@ namespace testAPP
             }
         }
 
+        // 삽입 버튼 클릭 시
+        private async void insert_Click(object sender, EventArgs e)
+        {
+            string title = tb_title.Text.Trim();
+            string writer = tb_writer.Text.Trim();
+            string genre = tb_genre.Text.Trim();
+            string description = tb_description.Text.Trim();
+
+            if (string.IsNullOrEmpty(title) && string.IsNullOrEmpty(writer) &&
+                string.IsNullOrEmpty(genre) && string.IsNullOrEmpty(description))
+            {
+                MessageBox.Show("모든 항목이 빈칸일 수 없습니다.");
+                return;
+            }
+
+            string tempId = GenerateTempId();
+
+            // Create SQL insert query using parameters
+            string query = "INSERT INTO book (title, writer, genre, description) VALUES (@Title, @Writer, @Genre, @Description)";
+            using (var conn = new NpgsqlConnection(connectionString))
+            {
+                await conn.OpenAsync();
+                using (var cmd = new NpgsqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("Title", title);
+                    cmd.Parameters.AddWithValue("Writer", writer);
+                    cmd.Parameters.AddWithValue("Genre", genre);
+                    cmd.Parameters.AddWithValue("Description", description);
+
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+
+            // Update ListView
+            string[] row = new string[] { tempId, title, writer, genre, description };
+            data.Add(row);
+            UpdateListView();
+
+            // Update UI
+            total_books.Text = "전체 도서수 : " + data.Count.ToString();
+            tb_title.Text = "";
+            tb_writer.Text = "";
+            tb_genre.Text = "";
+            tb_description.Text = "";
+
+            results_report.Text = "데이터가 삽입되었습니다.";
+            ResetLabels();
+        }
+
+
         // 수정 버튼 클릭 시
         private void bt_edit_Click(object sender, EventArgs e)
         {
@@ -268,9 +279,21 @@ namespace testAPP
 
                 if (updates.Count > 0)
                 {
-                    // 메모리에 수정 작업 추가
-                    string updateQuery = $"UPDATE book SET {string.Join(", ", updates)} WHERE id={id}";
-                    changes.Add(updateQuery);
+                    if (id.Contains("*"))
+                    {
+                        // 임시 데이터인 경우 삽입 쿼리 생성
+                        string insertQuery = $"INSERT INTO book (title, writer, genre, description) VALUES ('{newTitle}', '{newWriter}', '{newGenre}', '{newDescription}')";
+                        changes.Add(insertQuery);
+
+                        // 임시 ID 갱신 (새로운 임시 ID)
+                        lv_list.SelectedItems[0].SubItems[0].Text = GenerateTempId();
+                    }
+                    else
+                    {
+                        // 데이터베이스에 있는 데이터인 경우 수정 쿼리 생성
+                        string updateQuery = $"UPDATE book SET {string.Join(", ", updates)} WHERE id={id}";
+                        changes.Add(updateQuery);
+                    }
 
                     lv_list.SelectedItems[0].SubItems[1].Text = newTitle;
                     lv_list.SelectedItems[0].SubItems[2].Text = newWriter;
@@ -300,6 +323,7 @@ namespace testAPP
             ResetLabels();
         }
 
+
         // 삭제 버튼 클릭 시
         private void bt_delete_Click(object sender, EventArgs e)
         {
@@ -307,8 +331,11 @@ namespace testAPP
             {
                 string id = lv_list.SelectedItems[0].SubItems[0].Text; // 선택된 항목의 ID
 
-                // 메모리에 삭제 작업 추가
-                changes.Add($"DELETE FROM book WHERE id={id}");
+                if (!id.Contains("*"))
+                {
+                    // 데이터베이스에 있는 데이터인 경우에만 삭제 쿼리를 추가
+                    changes.Add($"DELETE FROM book WHERE id={id}");
+                }
 
                 // 데이터 삭제
                 lv_list.Items.RemoveAt(selectedIndex);
@@ -333,6 +360,7 @@ namespace testAPP
             // 별표 제거
             ResetLabels();
         }
+
 
         // 콤보박스 칼럼 검색
         private void SetupComboBox()
@@ -464,7 +492,7 @@ namespace testAPP
             ResetLabels();
         }
 
-        // 텍스트박스 TextChanged 이벤트 핸들러
+        // 수정된 라벨 별표 추가
         private void tb_TextChanged(object sender, EventArgs e)
         {
             if (!isUpdatingFromListView) // 리스트뷰에서 업데이트 중이 아닐 때만 별표 추가
