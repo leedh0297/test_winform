@@ -43,6 +43,14 @@
             this.cb_filter = new System.Windows.Forms.ComboBox();
             this.bt_refresh = new System.Windows.Forms.Button();
             this.bt_apply = new System.Windows.Forms.Button();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.labelTitle = new System.Windows.Forms.Label();
+            this.labelWriter = new System.Windows.Forms.Label();
+            this.labelGenre = new System.Windows.Forms.Label();
+            this.labelDescription = new System.Windows.Forms.Label();
+            this.statusStrip2 = new System.Windows.Forms.StatusStrip();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // lv_list
@@ -52,7 +60,7 @@
             this.lv_list.Location = new System.Drawing.Point(12, 41);
             this.lv_list.Name = "lv_list";
             this.lv_list.Size = new System.Drawing.Size(760, 214);
-            this.lv_list.TabIndex = 5;
+            this.lv_list.TabIndex = 4;
             this.lv_list.UseCompatibleStateImageBehavior = false;
             this.lv_list.View = System.Windows.Forms.View.Details;
             this.lv_list.SelectedIndexChanged += new System.EventHandler(this.lv_list_SelectedIndexChanged);
@@ -62,26 +70,26 @@
             this.bt_search.Location = new System.Drawing.Point(697, 12);
             this.bt_search.Name = "bt_search";
             this.bt_search.Size = new System.Drawing.Size(75, 23);
-            this.bt_search.TabIndex = 4;
+            this.bt_search.TabIndex = 3;
             this.bt_search.Text = "검색";
             this.bt_search.Click += new System.EventHandler(this.search_Click);
             // 
             // bt_insert
             // 
-            this.bt_insert.Location = new System.Drawing.Point(12, 332);
+            this.bt_insert.Location = new System.Drawing.Point(12, 341);
             this.bt_insert.Name = "bt_insert";
             this.bt_insert.Size = new System.Drawing.Size(75, 23);
-            this.bt_insert.TabIndex = 2;
+            this.bt_insert.TabIndex = 9;
             this.bt_insert.Text = "삽입";
             this.bt_insert.UseVisualStyleBackColor = true;
             this.bt_insert.Click += new System.EventHandler(this.insert_Click);
             // 
             // bt_delete
             // 
-            this.bt_delete.Location = new System.Drawing.Point(174, 332);
+            this.bt_delete.Location = new System.Drawing.Point(174, 341);
             this.bt_delete.Name = "bt_delete";
             this.bt_delete.Size = new System.Drawing.Size(75, 23);
-            this.bt_delete.TabIndex = 3;
+            this.bt_delete.TabIndex = 11;
             this.bt_delete.Text = "삭제";
             this.bt_delete.UseVisualStyleBackColor = true;
             this.bt_delete.Click += new System.EventHandler(this.bt_delete_Click);
@@ -91,20 +99,19 @@
             this.tb_search.Location = new System.Drawing.Point(12, 12);
             this.tb_search.Name = "tb_search";
             this.tb_search.Size = new System.Drawing.Size(573, 21);
-            this.tb_search.TabIndex = 6;
+            this.tb_search.TabIndex = 1;
             // 
             // tb_title
             // 
-            this.tb_title.Location = new System.Drawing.Point(12, 305);
+            this.tb_title.Location = new System.Drawing.Point(12, 314);
             this.tb_title.Name = "tb_title";
             this.tb_title.Size = new System.Drawing.Size(130, 21);
-            this.tb_title.TabIndex = 7;
-            this.tb_title.Text = "제목";
+            this.tb_title.TabIndex = 5;
             // 
             // total_books
             // 
             this.total_books.AutoSize = true;
-            this.total_books.Location = new System.Drawing.Point(23, 276);
+            this.total_books.Location = new System.Drawing.Point(10, 268);
             this.total_books.Name = "total_books";
             this.total_books.Size = new System.Drawing.Size(65, 12);
             this.total_books.TabIndex = 8;
@@ -112,34 +119,31 @@
             // 
             // tb_genre
             // 
-            this.tb_genre.Location = new System.Drawing.Point(284, 305);
+            this.tb_genre.Location = new System.Drawing.Point(284, 314);
             this.tb_genre.Name = "tb_genre";
             this.tb_genre.Size = new System.Drawing.Size(130, 21);
-            this.tb_genre.TabIndex = 9;
-            this.tb_genre.Text = "장르";
+            this.tb_genre.TabIndex = 7;
             // 
             // tb_description
             // 
-            this.tb_description.Location = new System.Drawing.Point(420, 305);
+            this.tb_description.Location = new System.Drawing.Point(420, 314);
             this.tb_description.Name = "tb_description";
             this.tb_description.Size = new System.Drawing.Size(352, 21);
-            this.tb_description.TabIndex = 11;
-            this.tb_description.Text = "내용";
+            this.tb_description.TabIndex = 8;
             // 
             // tb_writer
             // 
-            this.tb_writer.Location = new System.Drawing.Point(148, 305);
+            this.tb_writer.Location = new System.Drawing.Point(148, 314);
             this.tb_writer.Name = "tb_writer";
             this.tb_writer.Size = new System.Drawing.Size(130, 21);
-            this.tb_writer.TabIndex = 12;
-            this.tb_writer.Text = "작가";
+            this.tb_writer.TabIndex = 6;
             // 
             // bt_edit
             // 
-            this.bt_edit.Location = new System.Drawing.Point(93, 332);
+            this.bt_edit.Location = new System.Drawing.Point(93, 341);
             this.bt_edit.Name = "bt_edit";
             this.bt_edit.Size = new System.Drawing.Size(75, 23);
-            this.bt_edit.TabIndex = 13;
+            this.bt_edit.TabIndex = 10;
             this.bt_edit.Text = "수정";
             this.bt_edit.UseVisualStyleBackColor = true;
             this.bt_edit.Click += new System.EventHandler(this.bt_edit_Click);
@@ -148,38 +152,105 @@
             // 
             this.cb_filter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cb_filter.FormattingEnabled = true;
-            this.cb_filter.Location = new System.Drawing.Point(591, 15);
+            this.cb_filter.Location = new System.Drawing.Point(591, 12);
             this.cb_filter.Name = "cb_filter";
             this.cb_filter.Size = new System.Drawing.Size(100, 20);
-            this.cb_filter.TabIndex = 14;
+            this.cb_filter.TabIndex = 2;
             // 
             // bt_refresh
             // 
             this.bt_refresh.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.bt_refresh.FlatAppearance.BorderSize = 0;
-            this.bt_refresh.Location = new System.Drawing.Point(697, 332);
+            this.bt_refresh.Location = new System.Drawing.Point(697, 341);
             this.bt_refresh.Name = "bt_refresh";
             this.bt_refresh.Size = new System.Drawing.Size(75, 23);
-            this.bt_refresh.TabIndex = 15;
+            this.bt_refresh.TabIndex = 12;
             this.bt_refresh.Text = "새로고침";
             this.bt_refresh.UseVisualStyleBackColor = true;
             this.bt_refresh.Click += new System.EventHandler(this.bt_refresh_Click);
             // 
             // bt_apply
             // 
-            this.bt_apply.Location = new System.Drawing.Point(697, 414);
+            this.bt_apply.Location = new System.Drawing.Point(697, 374);
             this.bt_apply.Name = "bt_apply";
             this.bt_apply.Size = new System.Drawing.Size(75, 23);
-            this.bt_apply.TabIndex = 16;
+            this.bt_apply.TabIndex = 13;
             this.bt_apply.Text = "적용";
             this.bt_apply.UseVisualStyleBackColor = true;
             this.bt_apply.Click += new System.EventHandler(this.bt_apply_Click);
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 17);
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Dock = System.Windows.Forms.DockStyle.None;
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel1});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 427);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(17, 22);
+            this.statusStrip1.TabIndex = 14;
+            this.statusStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.statusStrip1_ItemClicked);
+            // 
+            // labelTitle
+            // 
+            this.labelTitle.AutoSize = true;
+            this.labelTitle.Location = new System.Drawing.Point(12, 299);
+            this.labelTitle.Name = "labelTitle";
+            this.labelTitle.Size = new System.Drawing.Size(29, 12);
+            this.labelTitle.TabIndex = 15;
+            this.labelTitle.Text = "Title";
+            this.labelTitle.Click += new System.EventHandler(this.labelTitle_Click);
+            // 
+            // labelWriter
+            // 
+            this.labelWriter.AutoSize = true;
+            this.labelWriter.Location = new System.Drawing.Point(146, 299);
+            this.labelWriter.Name = "labelWriter";
+            this.labelWriter.Size = new System.Drawing.Size(36, 12);
+            this.labelWriter.TabIndex = 16;
+            this.labelWriter.Text = "Writer";
+            // 
+            // labelGenre
+            // 
+            this.labelGenre.AutoSize = true;
+            this.labelGenre.Location = new System.Drawing.Point(282, 299);
+            this.labelGenre.Name = "labelGenre";
+            this.labelGenre.Size = new System.Drawing.Size(39, 12);
+            this.labelGenre.TabIndex = 17;
+            this.labelGenre.Text = "Genre";
+            // 
+            // labelDescription
+            // 
+            this.labelDescription.AutoSize = true;
+            this.labelDescription.Location = new System.Drawing.Point(418, 299);
+            this.labelDescription.Name = "labelDescription";
+            this.labelDescription.Size = new System.Drawing.Size(68, 12);
+            this.labelDescription.TabIndex = 18;
+            this.labelDescription.Text = "Description";
+            // 
+            // statusStrip2
+            // 
+            this.statusStrip2.Location = new System.Drawing.Point(0, 427);
+            this.statusStrip2.Name = "statusStrip2";
+            this.statusStrip2.Size = new System.Drawing.Size(784, 22);
+            this.statusStrip2.TabIndex = 19;
+            this.statusStrip2.Text = "statusStrip2";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 449);
+            this.Controls.Add(this.statusStrip2);
+            this.Controls.Add(this.labelDescription);
+            this.Controls.Add(this.labelGenre);
+            this.Controls.Add(this.labelWriter);
+            this.Controls.Add(this.labelTitle);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.bt_apply);
             this.Controls.Add(this.bt_refresh);
             this.Controls.Add(this.cb_filter);
@@ -197,6 +268,8 @@
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -218,6 +291,13 @@
         private System.Windows.Forms.ComboBox cb_filter;
         private System.Windows.Forms.Button bt_refresh;
         private System.Windows.Forms.Button bt_apply;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.Label labelTitle;
+        private System.Windows.Forms.Label labelWriter;
+        private System.Windows.Forms.Label labelGenre;
+        private System.Windows.Forms.Label labelDescription;
+        private System.Windows.Forms.StatusStrip statusStrip2;
     }
 }
 

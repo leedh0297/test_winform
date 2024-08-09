@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -22,6 +23,12 @@ namespace testAPP
         public Form1()
         {
             InitializeComponent();
+
+            // 상태 표시줄 초기화
+            statusStrip = new StatusStrip();
+            statusLabel = new ToolStripStatusLabel();
+            statusStrip.Items.Add(statusLabel);
+            Controls.Add(statusStrip);
 
             // ListView의 열을 동적으로 설정
             SetupListViewColumns();
@@ -126,8 +133,9 @@ namespace testAPP
                 return;
             }
 
-            string[] newRow = new string[] { "", title, writer, genre, description }; // 새로운 데이터를 추가
-            addedData.Add(newRow); // 새로운 데이터를 추가 리스트에 추가
+            // 새로운 항목에 임시 ID할당
+            string[] newRow = new string[] { Guid.NewGuid().ToString(), title, writer, genre, description };
+            addedData.Add(newRow);
 
             // ListView에 추가
             ListViewItem item = new ListViewItem(newRow);
@@ -141,6 +149,9 @@ namespace testAPP
 
             // 전체 도서수 업데이트
             total_books.Text = "전체 도서수 : " + (data.Count + addedData.Count).ToString();
+
+            // 상태 표시줄 업데이트
+            statusLabel.Text = "    항목이 삽입되었습니다.";
         }
 
         // 리스트 칼럼 클릭 시 정렬
@@ -213,11 +224,32 @@ namespace testAPP
                 string newGenre = tb_genre.Text.Trim();
                 string newDescription = tb_description.Text.Trim();
 
-                // 선택된 ListView 항목 업데이트
-                lv_list.SelectedItems[0].SubItems[1].Text = newTitle;
-                lv_list.SelectedItems[0].SubItems[2].Text = newWriter;
-                lv_list.SelectedItems[0].SubItems[3].Text = newGenre;
-                lv_list.SelectedItems[0].SubItems[4].Text = newDescription;
+                var selectedItem = lv_list.SelectedItems[0];
+                string id = selectedItem.SubItems[0].Text;
+
+
+                // addedData에서 해당 항목 찾기
+                var addedItem = addedData.FirstOrDefault(row => row[0] == id);
+                if (addedItem != null)
+                {
+                    // addedData 항목 수정
+                    addedItem[1] = newTitle;
+                    addedItem[2] = newWriter;
+                    addedItem[3] = newGenre;
+                    addedItem[4] = newDescription;
+                }
+                else
+                {
+                    // 기존 데이터 수정
+                    selectedItem.SubItems[1].Text = newTitle;
+                    selectedItem.SubItems[2].Text = newWriter;
+                    selectedItem.SubItems[3].Text = newGenre;
+                    selectedItem.SubItems[4].Text = newDescription;
+                }
+
+                // 상태 표시줄 업데이트
+                statusLabel.Text = "    항목이 수정되었습니다.";
+
             }
             else
             {
@@ -232,7 +264,23 @@ namespace testAPP
             using (var conn = new NpgsqlConnection(connectionString))
             {
                 conn.Open();
-                foreach (int id in deletedIds)
+
+                // 추가된 항목을 데이터베이스에 삽입
+                foreach (var Row in addedData)
+                {
+                    using (var cmd = new NpgsqlCommand("INSERT INTO book (title, writer, genre, description) VALUES (@title, @writer, @genre, @description)", conn))
+                    {
+                        cmd.Parameters.AddWithValue("title", Row[1]);
+                        cmd.Parameters.AddWithValue("writer", Row[2]);
+                        cmd.Parameters.AddWithValue("genre", Row[3]);
+                        cmd.Parameters.AddWithValue("description", Row[4]);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                addedData.Clear();
+
+                // 삭제된 항목을 데이터베이스에서 제거
+                foreach (var id in deletedIds)
                 {
                     using (var cmd = new NpgsqlCommand("DELETE FROM book WHERE id = @id", conn))
                     {
@@ -240,23 +288,7 @@ namespace testAPP
                         cmd.ExecuteNonQuery();
                     }
                 }
-            }
-
-            // 추가 항목을 데이터베이스에 추가
-            using (var conn = new NpgsqlConnection(connectionString))
-            {
-                conn.Open();
-                foreach (var newRow in addedData)
-                {
-                    using (var cmd = new NpgsqlCommand("INSERT INTO book (title, writer, genre, description) VALUES (@title, @writer, @genre, @description)", conn))
-                    {
-                        cmd.Parameters.AddWithValue("title", newRow[1]);
-                        cmd.Parameters.AddWithValue("writer", newRow[2]);
-                        cmd.Parameters.AddWithValue("genre", newRow[3]);
-                        cmd.Parameters.AddWithValue("description", newRow[4]);
-                        cmd.ExecuteNonQuery();
-                    }
-                }
+                deletedIds.Clear();
             }
 
             // 데이터베이스에서 데이터 다시 로드
@@ -265,9 +297,13 @@ namespace testAPP
             // 변경 사항 초기화
             addedData.Clear();
             deletedIds.Clear();
+            addedItems.Clear();
 
             // 전체 도서수 업데이트
             total_books.Text = "전체 도서수 : " + data.Count.ToString();
+
+            // 상태 표시줄 업데이트
+            statusLabel.Text = "    변경 사항이 데이터베이스에 적용되었습니다.";
         }
 
         // 삭제 버튼 클릭 시
@@ -275,10 +311,22 @@ namespace testAPP
         {
             if (selectedIndex != -1)
             {
-                int id = int.Parse(lv_list.SelectedItems[0].SubItems[0].Text); // 선택된 항목의 ID
+                var selectedItem = lv_list.SelectedItems[0];
+                string id = selectedItem.SubItems[0].Text;
 
-                // 삭제 항목을 데이터베이스에서 삭제하는 대신 삭제 리스트에 추가
-                deletedIds.Add(id);
+                // 추가된 항목인지 확인
+                var addedItem = addedData.FirstOrDefault(row => row[0] == id);
+                if (addedItem != null)
+                {
+                    // addedData 리스트에서 항목 제거
+                    addedData.Remove(addedItem);
+                }
+                else
+                {
+                    // 기존 항목 삭제 처리
+                    int existingId = int.Parse(id);
+                    deletedIds.Add(existingId);
+                }
 
                 // ListView에서 항목 삭제
                 lv_list.Items.RemoveAt(selectedIndex);
@@ -294,6 +342,9 @@ namespace testAPP
 
                 // 전체 도서수 업데이트
                 total_books.Text = "전체 도서수 : " + (data.Count - deletedIds.Count).ToString();
+
+                // 상태 표시줄 업데이트
+                statusLabel.Text = "    항목이 삭제되었습니다.";
             }
             else
             {
@@ -367,30 +418,40 @@ namespace testAPP
 
             foreach (string[] row in data)
             {
-                bool addRow = true;
-                if (!string.IsNullOrEmpty(searchText))
-                {
-                    addRow = row.Any(col => col.ToLower().Contains(searchText));
-                }
+                AddRowToListView(row, filterColumn, searchText);
+            }
 
-                if (addRow && !string.IsNullOrEmpty(filterColumn) && filterColumn != "전체")
-                {
-                    int columnIndex = lv_list.Columns.Cast<ColumnHeader>().ToList().FindIndex(c => c.Text == filterColumn);
-                    if (columnIndex != -1)
-                    {
-                        addRow = row[columnIndex].ToLower().Contains(searchText);
-                    }
-                }
+            foreach (var addedItem in addedItems)
+            {
+                AddRowToListView(addedItem.Item1, filterColumn, searchText);
+            }
+        }
+        private void AddRowToListView(string[] row, string filterColumn, string searchText)
+        {
+            bool addRow = true;
 
-                if (addRow)
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                addRow = row.Any(col => col.ToLower().Contains(searchText));
+            }
+
+            if (addRow && !string.IsNullOrEmpty(filterColumn) && filterColumn != "전체")
+            {
+                int columnIndex = lv_list.Columns.Cast<ColumnHeader>().ToList().FindIndex(c => c.Text == filterColumn);
+                if (columnIndex != -1)
                 {
-                    ListViewItem item = new ListViewItem(row);
-                    lv_list.Items.Add(item);
+                    addRow = row[columnIndex].ToLower().Contains(searchText);
                 }
+            }
+
+            if (addRow)
+            {
+                ListViewItem item = new ListViewItem(row);
+                lv_list.Items.Add(item);
             }
         }
 
-        // 리스트뷰 항목 선택 이벤트 핸들러 추가
+        // 리스트뷰 선택 항목 변경 시
         private void lv_list_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (lv_list.SelectedItems.Count > 0)
@@ -403,6 +464,25 @@ namespace testAPP
                 tb_genre.Text = lv_list.SelectedItems[0].SubItems[3].Text;
                 tb_description.Text = lv_list.SelectedItems[0].SubItems[4].Text;
             }
+        }
+
+        private List<Tuple<string[], ListViewItem>> addedItems = new List<Tuple<string[], ListViewItem>>();
+
+        // 상태 표시줄 추가
+        private StatusStrip statusStrip;
+        private ToolStripStatusLabel statusLabel;
+
+        private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+
+        private void labelTitle_Click(object sender, EventArgs e)
+        {
+            this.Controls.Add(labelTitle);
+            this.Controls.Add(labelWriter);
+            this.Controls.Add(labelGenre);
+            this.Controls.Add(labelDescription);
         }
     }
 }
