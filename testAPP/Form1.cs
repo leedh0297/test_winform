@@ -42,7 +42,7 @@ namespace testAPP
             lv_list.SelectedIndexChanged += new EventHandler(lv_list_SelectedIndexChanged);
 
             // 결과 보고 라벨 업데이트
-            results_report.Text = "데이터를 불러왔습니다.";
+            results_report2.Text = "데이터를 불러왔습니다.";
 
             // 텍스트박스 TextChanged 이벤트 핸들러 추가
             tb_title.TextChanged += new EventHandler(tb_TextChanged);
@@ -246,7 +246,7 @@ namespace testAPP
             tb_genre.Text = "";
             tb_description.Text = "";
 
-            results_report.Text = "데이터가 삽입되었습니다.";
+            results_report2.Text = "데이터가 삽입되었습니다.";
             ResetLabels();
         }
 
@@ -310,7 +310,7 @@ namespace testAPP
                     tb_description.Text = "";
 
                     // 결과 보고 라벨 업데이트
-                    results_report.Text = "데이터가 수정되었습니다.";
+                    results_report2.Text = "데이터가 수정되었습니다.";
                 }
                 else
                 {
@@ -359,7 +359,7 @@ namespace testAPP
             }
 
             // 결과 보고 라벨 업데이트
-            results_report.Text = "데이터가 삭제되었습니다.";
+            results_report2.Text = "데이터가 삭제되었습니다.";
 
             // 별표 제거
             ResetLabels();
@@ -462,7 +462,7 @@ namespace testAPP
             LoadDataFromDatabase();
 
             // 결과 보고 라벨 업데이트
-            results_report.Text = "데이터베이스에 저장되었습니다.";
+            results_report2.Text = "데이터베이스에 저장되었습니다.";
 
             // 별표 제거
             ResetLabels();
@@ -490,7 +490,7 @@ namespace testAPP
             UpdateListView();
 
             // 결과 보고 라벨 업데이트
-            results_report.Text = "데이터를 새로 고침 했습니다.";
+            results_report2.Text = "데이터를 새로 고침 했습니다.";
 
             // 별표 제거
             ResetLabels();

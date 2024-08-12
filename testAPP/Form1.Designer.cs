@@ -43,11 +43,13 @@
             this.cb_filter = new System.Windows.Forms.ComboBox();
             this.bt_refresh = new System.Windows.Forms.Button();
             this.bt_apply = new System.Windows.Forms.Button();
-            this.results_report = new System.Windows.Forms.Label();
             this.title_label = new System.Windows.Forms.Label();
             this.writer_label = new System.Windows.Forms.Label();
             this.genre_label = new System.Windows.Forms.Label();
             this.description_label = new System.Windows.Forms.Label();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.results_report2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // lv_list
@@ -171,23 +173,13 @@
             // 
             // bt_apply
             // 
-            this.bt_apply.Location = new System.Drawing.Point(697, 414);
+            this.bt_apply.Location = new System.Drawing.Point(697, 401);
             this.bt_apply.Name = "bt_apply";
             this.bt_apply.Size = new System.Drawing.Size(75, 23);
             this.bt_apply.TabIndex = 17;
             this.bt_apply.Text = "적용";
             this.bt_apply.UseVisualStyleBackColor = true;
             this.bt_apply.Click += new System.EventHandler(this.bt_apply_Click);
-            // 
-            // results_report
-            // 
-            this.results_report.AutoSize = true;
-            this.results_report.BackColor = System.Drawing.SystemColors.Control;
-            this.results_report.Location = new System.Drawing.Point(23, 419);
-            this.results_report.Name = "results_report";
-            this.results_report.Size = new System.Drawing.Size(29, 12);
-            this.results_report.TabIndex = 18;
-            this.results_report.Text = "결과";
             // 
             // title_label
             // 
@@ -225,16 +217,32 @@
             this.description_label.TabIndex = 22;
             this.description_label.Text = "Description";
             // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.results_report2});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 427);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(784, 22);
+            this.statusStrip1.TabIndex = 23;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // results_report2
+            // 
+            this.results_report2.Name = "results_report2";
+            this.results_report2.Size = new System.Drawing.Size(31, 17);
+            this.results_report2.Text = "결과";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 449);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.description_label);
             this.Controls.Add(this.genre_label);
             this.Controls.Add(this.writer_label);
             this.Controls.Add(this.title_label);
-            this.Controls.Add(this.results_report);
             this.Controls.Add(this.bt_apply);
             this.Controls.Add(this.bt_refresh);
             this.Controls.Add(this.cb_filter);
@@ -252,6 +260,8 @@
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -273,10 +283,11 @@
         private System.Windows.Forms.ComboBox cb_filter;
         private System.Windows.Forms.Button bt_refresh;
         private System.Windows.Forms.Button bt_apply;
-        private System.Windows.Forms.Label results_report;
         private System.Windows.Forms.Label title_label;
         private System.Windows.Forms.Label writer_label;
         private System.Windows.Forms.Label genre_label;
         private System.Windows.Forms.Label description_label;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel results_report2;
     }
 }
