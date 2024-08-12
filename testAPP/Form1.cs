@@ -123,7 +123,7 @@ namespace testAPP
         private string GenerateTempId()
         {
             // A, B, C 등의 임시 ID를 생성
-            return (tempIdCounter++ + "*").ToString();
+            return ("*").ToString();
         }
 
         // 리스트 칼럼 클릭 시 정렬
