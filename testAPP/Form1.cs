@@ -86,6 +86,8 @@ namespace testAPP
         // 데이터베이스에서 데이터 로드
         private void LoadDataFromDatabase()
         {
+            int maxIdLength = GetMaxIdLength(); // 최대 ID 자릿수 가져오기
+
             using (var conn = new NpgsqlConnection(connectionString))
             {
                 conn.Open();
@@ -99,7 +101,15 @@ namespace testAPP
                             string[] row = new string[reader.FieldCount];
                             for (int i = 0; i < reader.FieldCount; i++)
                             {
-                                row[i] = reader[i].ToString();
+                                if (i == 0) // ID 열이 첫 번째 열이라고 가정
+                                {
+                                    int id = int.Parse(reader[i].ToString());
+                                    row[i] = id.ToString($"D{maxIdLength}"); // ID를 최대 자릿수로 형식화
+                                }
+                                else
+                                {
+                                    row[i] = reader[i].ToString();
+                                }
                             }
                             data.Add(row); // 새 데이터를 추가
                         }
@@ -108,6 +118,8 @@ namespace testAPP
             }
             UpdateListView(); // ListView를 업데이트
         }
+
+
 
         // 검색 버튼 클릭 시
         private void search_Click(object sender, EventArgs e)
@@ -125,7 +137,7 @@ namespace testAPP
             string genre = tb_genre.Text.Trim();
             string description = tb_description.Text.Trim();
 
-            string insertedFields = "삽입된 항목: ";
+            string insertedFields = "";
 
             if (!string.IsNullOrEmpty(title)) insertedFields += "제목 ";
             if (!string.IsNullOrEmpty(writer)) insertedFields += "저자 ";
@@ -222,7 +234,7 @@ namespace testAPP
                 string newGenre = tb_genre.Text.Trim();
                 string newDescription = tb_description.Text.Trim();
 
-                string modifiedFields = "수정된 항목: ";
+                string modifiedFields = "";
 
                 if (newTitle != originalTitle) modifiedFields += "제목 ";
                 if (newWriter != originalWriter) modifiedFields += "저자 ";
@@ -506,6 +518,28 @@ namespace testAPP
         private string originalWriter = "";
         private string originalGenre = "";
         private string originalDescription = "";
+
+        private int GetMaxIdLength()
+        {
+            int maxId = 0;
+
+            using (var conn = new NpgsqlConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand("SELECT MAX(id) FROM book", conn))
+                {
+                    var result = cmd.ExecuteScalar();
+                    if (result != DBNull.Value)
+                    {
+                        maxId = Convert.ToInt32(result);
+                    }
+                }
+            }
+
+            // 최대 ID 값의 자릿수를 반환
+            return maxId.ToString().Length;
+        }
+
 
     }
 }
