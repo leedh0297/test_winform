@@ -97,6 +97,7 @@
             this.tb_search.Name = "tb_search";
             this.tb_search.Size = new System.Drawing.Size(573, 21);
             this.tb_search.TabIndex = 5;
+            this.tb_search.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tb_search_KeyDown);
             // 
             // tb_title
             // 
@@ -177,7 +178,7 @@
             this.bt_apply.Name = "bt_apply";
             this.bt_apply.Size = new System.Drawing.Size(75, 23);
             this.bt_apply.TabIndex = 17;
-            this.bt_apply.Text = "적용";
+            this.bt_apply.Text = "저장";
             this.bt_apply.UseVisualStyleBackColor = true;
             this.bt_apply.Click += new System.EventHandler(this.bt_apply_Click);
             // 
@@ -258,7 +259,7 @@
             this.Controls.Add(this.bt_search);
             this.Controls.Add(this.lv_list);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "도서검색";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();

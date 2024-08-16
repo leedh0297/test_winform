@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -14,10 +15,14 @@ namespace testAPP
         private SortOrder sortOrder = SortOrder.Ascending; // 정렬 순서
         private int sortColumn = -1; // 정렬할 컬럼의 인덱스
         private int selectedIndex = -1; // 선택된 항목의 인덱스를 저장할 변수
-        private int tempIdCounter = 1; // 임시 ID를 위한 카운터
         private bool isUpdatingFromListView = false; // 리스트뷰에서 텍스트박스를 업데이트 중인지 여부
 
         private string connectionString = "Host=192.168.201.151;Username=postgres;Password=12345678;Database=internTest"; // PostgreSQL 연결 문자열
+
+        // 변경된 데이터를 추적하기 위한 리스트
+        private List<string[]> addedData = new List<string[]>();
+        private List<int> deletedIds = new List<int>();
+
 
         public Form1()
         {
@@ -49,13 +54,14 @@ namespace testAPP
             tb_writer.TextChanged += new EventHandler(tb_TextChanged);
             tb_genre.TextChanged += new EventHandler(tb_TextChanged);
             tb_description.TextChanged += new EventHandler(tb_TextChanged);
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
         }
 
-        // 테이블의 칼럼을 ListView에 동적으로 추가
+        /*// 테이블의 칼럼을 ListView에 동적으로 추가
         private void SetupListViewColumns()
         {
             lv_list.Columns.Clear();
@@ -83,11 +89,55 @@ namespace testAPP
             }
 
             lv_list.View = View.Details; // ListView를 상세보기로 설정
+        }*/
+
+        // 테이블의 칼럼을 ListView에 고정된 방식으로 추가
+        private void SetupListViewColumns()
+        {
+            lv_list.Columns.Clear();
+
+            // 고정된 컬럼 이름과 너비 설정
+            //lv_list.Columns.Add("", 0); // ID 열 오른쪽 정렬
+            lv_list.Columns.Add("ID", 120, HorizontalAlignment.Right); // ID 열 오른쪽 정렬
+            lv_list.Columns.Add("Title", 170, HorizontalAlignment.Center); // Title 열 가운데 정렬
+            lv_list.Columns.Add("Writer", 100);
+            lv_list.Columns.Add("Genre", 70);
+            lv_list.Columns.Add("Description", 300);
+
+            lv_list.View = View.Details; // ListView를 상세보기로 설정
         }
 
+
+
+
+         
+        // 데이터베이스에서 데이터 로드
         // 데이터베이스에서 데이터 로드
         private void LoadDataFromDatabase()
         {
+            int maxIdLength = 0; // ID 열의 최대 자릿수를 저장할 변수
+
+            // 첫 번째 패스: ID 열의 최대 자릿수 계산
+            using (var conn = new NpgsqlConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand("SELECT id FROM book", conn))
+                {
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int idLength = reader["id"].ToString().Length;
+                            if (idLength > maxIdLength)
+                            {
+                                maxIdLength = idLength;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 두 번째 패스: 데이터 로드 및 포맷팅
             using (var conn = new NpgsqlConnection(connectionString))
             {
                 conn.Open();
@@ -101,7 +151,14 @@ namespace testAPP
                             string[] row = new string[reader.FieldCount];
                             for (int i = 0; i < reader.FieldCount; i++)
                             {
-                                row[i] = reader[i].ToString();
+                                if (i == 0) // ID 열만 포맷팅
+                                {
+                                    row[i] = reader[i].ToString().PadLeft(maxIdLength, '0');
+                                }
+                                else
+                                {
+                                    row[i] = reader[i].ToString();
+                                }
                             }
                             data.Add(row); // 새 데이터를 추가
                         }
@@ -110,6 +167,7 @@ namespace testAPP
             }
             UpdateListView(); // ListView를 업데이트
         }
+
 
         // 검색 버튼 클릭 시
         private void search_Click(object sender, EventArgs e)
@@ -120,11 +178,12 @@ namespace testAPP
         }
 
         // 임시 ID 생성 함수
+        // 임시 ID 생성 함수
         private string GenerateTempId()
         {
-            // A, B, C 등의 임시 ID를 생성
-            return ("*").ToString();
+            return "*"; // 단순히 별표 하나를 반환
         }
+
 
         // 리스트 칼럼 클릭 시 정렬
         private void list_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -165,42 +224,40 @@ namespace testAPP
 
             public int Compare(object x, object y)
             {
-                int returnVal;
-                if (col == 0) // 첫 번째 열 (id 열)은 숫자형으로 정렬
-                {
-                    bool isTempId1 = !int.TryParse(((ListViewItem)x).SubItems[col].Text, out int id1);
-                    bool isTempId2 = !int.TryParse(((ListViewItem)y).SubItems[col].Text, out int id2);
+                string text1 = ((ListViewItem)x).SubItems[col].Text;
+                string text2 = ((ListViewItem)y).SubItems[col].Text;
 
-                    if (isTempId1 && isTempId2)
+                // 문자열 앞부분의 문자 부분 비교
+                int stringCompareResult = String.Compare(
+                    new string(text1.TakeWhile(char.IsLetter).ToArray()),
+                    new string(text2.TakeWhile(char.IsLetter).ToArray())
+                );
+
+                if (stringCompareResult == 0) // 문자가 동일한 경우
+                {
+                    // 숫자 부분을 추출하여 비교
+                    string numPart1 = new string(text1.SkipWhile(char.IsLetter).ToArray());
+                    string numPart2 = new string(text2.SkipWhile(char.IsLetter).ToArray());
+
+                    if (int.TryParse(numPart1, out int num1) && int.TryParse(numPart2, out int num2))
                     {
-                        returnVal = String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
-                    }
-                    else if (isTempId1)
-                    {
-                        returnVal = 1; // Temp ID goes after real ID
-                    }
-                    else if (isTempId2)
-                    {
-                        returnVal = -1; // Real ID goes before temp ID
+                        stringCompareResult = num1.CompareTo(num2);
                     }
                     else
                     {
-                        returnVal = id1.CompareTo(id2);
+                        stringCompareResult = String.Compare(numPart1, numPart2);
                     }
                 }
-                else
-                {
-                    returnVal = String.Compare(((ListViewItem)x).SubItems[col].Text,
-                                               ((ListViewItem)y).SubItems[col].Text);
-                }
 
+                // 정렬 순서 적용
                 if (order == SortOrder.Descending)
-                    returnVal *= -1;
+                    stringCompareResult *= -1;
 
-                return returnVal;
+                return stringCompareResult;
             }
         }
 
+        /*
         // 삽입 버튼 클릭 시
         private async void insert_Click(object sender, EventArgs e)
         {
@@ -248,10 +305,47 @@ namespace testAPP
 
             results_report2.Text = "데이터가 삽입되었습니다.";
             ResetLabels();
+        }*/
+
+        // 삽입 버튼 클릭 시
+        // 삽입 버튼 클릭 시
+        private void insert_Click(object sender, EventArgs e)
+        {
+            string title = tb_title.Text.Trim();
+            string writer = tb_writer.Text.Trim();
+            string genre = tb_genre.Text.Trim();
+            string description = tb_description.Text.Trim();
+
+            if (string.IsNullOrEmpty(title) && string.IsNullOrEmpty(writer) &&
+                string.IsNullOrEmpty(genre) && string.IsNullOrEmpty(description))
+            {
+                MessageBox.Show("모든 항목이 빈칸일 수 없습니다.");
+                return;
+            }
+
+            // 임시 ID 생성
+            string tempId = GenerateTempId();
+
+            // Create new row with formatted ID
+            string[] newRow = new string[] { tempId, title, writer, genre, description };
+            addedData.Add(newRow);
+
+            ListViewItem item = new ListViewItem(newRow);
+            lv_list.Items.Add(item);
+
+            // 텍스트박스 초기화
+            total_books.Text = "전체 도서수 : " + lv_list.Items.Count.ToString(); // 데이터 리스트의 수를 가져옵니다.
+            tb_title.Text = "";
+            tb_writer.Text = "";
+            tb_genre.Text = "";
+            tb_description.Text = "";
         }
 
 
-        // 수정 버튼 클릭 시
+
+
+
+        /*// 수정 버튼 클릭 시
         private void bt_edit_Click(object sender, EventArgs e)
         {
             if (selectedIndex != -1)
@@ -324,10 +418,45 @@ namespace testAPP
 
             // 별표 제거
             ResetLabels();
+        }*/
+
+        // 수정 버튼 클릭 시
+        private void bt_edit_Click(object sender, EventArgs e)
+        {
+            if (selectedIndex != -1)
+            {
+                string newTitle = tb_title.Text.Trim();
+                string newWriter = tb_writer.Text.Trim();
+                string newGenre = tb_genre.Text.Trim();
+                string newDescription = tb_description.Text.Trim();
+
+                var selectedItem = lv_list.SelectedItems[0];
+                selectedItem.SubItems[1].Text = newTitle;
+                selectedItem.SubItems[2].Text = newWriter;
+                selectedItem.SubItems[3].Text = newGenre;
+                selectedItem.SubItems[4].Text = newDescription;
+
+                // 결과 보고 라벨 업데이트
+                results_report2.Text = "데이터가 수정되었습니다.";
+
+                // 수정된 항목을 modifiedData에 추가
+                string[] modifiedRow = new string[] { selectedItem.SubItems[0].Text.PadLeft(6, '0'), newTitle, newWriter, newGenre, newDescription };
+                modifiedData.Add(modifiedRow);
+
+                originalTitle = newTitle;
+                originalWriter = newWriter;
+                originalGenre = newGenre;
+                originalDescription = newDescription;
+            }
+            else
+            {
+                MessageBox.Show("수정할 항목을 선택하세요.");
+            }
+            // 별표 제거
+            ResetLabels();
         }
 
-
-
+        /*
         // 삭제 버튼 클릭 시
         private void bt_delete_Click(object sender, EventArgs e)
         {
@@ -363,7 +492,78 @@ namespace testAPP
 
             // 별표 제거
             ResetLabels();
+        }*/
+
+        // 삭제 버튼 클릭 시
+        // 삭제 버튼 클릭 시
+        private void bt_delete_Click(object sender, EventArgs e)
+        {
+            // 선택된 항목이 있는지 확인
+            if (lv_list.SelectedItems.Count > 0)
+            {
+                // 선택된 모든 항목을 삭제
+                foreach (ListViewItem selectedItem in lv_list.SelectedItems)
+                {
+                    string id = selectedItem.SubItems[0].Text; // 선택된 항목의 ID
+
+                    if (id.Contains("*"))
+                    {
+                        // 임시 데이터인 경우
+                        int indexToRemove = selectedItem.Index;
+
+                        // 데이터 리스트에서 임시 데이터 삭제
+                        if (indexToRemove >= 0 && indexToRemove < data.Count)
+                        {
+                            data.RemoveAt(indexToRemove);
+                        }
+
+                        // ListView에서 항목 삭제
+                        if (indexToRemove >= 0 && indexToRemove < lv_list.Items.Count)
+                        {
+                            lv_list.Items.RemoveAt(indexToRemove);
+                        }
+                    }
+                    else
+                    {
+                        // 데이터베이스에 저장된 데이터인 경우
+                        int idValue;
+                        if (int.TryParse(id, out idValue))
+                        {
+                            // 삭제할 항목의 ID를 deletedIds 리스트에 추가
+                            deletedIds.Add(idValue);
+
+                            // ListView에서 항목 삭제
+                            int indexToRemove = selectedItem.Index;
+                            if (indexToRemove >= 0 && indexToRemove < lv_list.Items.Count)
+                            {
+                                lv_list.Items.RemoveAt(indexToRemove); // ListView에서 삭제
+                                data.RemoveAt(indexToRemove); // 데이터 리스트에서 삭제
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("유효하지 않은 ID입니다.");
+                        }
+                    }
+                }
+
+                // 전체 도서 수 업데이트
+                total_books.Text = "전체 도서수 : " + data.Count.ToString();
+
+                // 텍스트 박스 및 선택된 항목 초기화
+                tb_clear();
+
+                // 결과 보고 라벨 업데이트
+                results_report2.Text = "선택된 데이터가 삭제되었습니다.";
+                ResetLabels();
+            }
+            else
+            {
+                MessageBox.Show("삭제할 항목을 선택하세요.");
+            }
         }
+
+
 
 
         // 콤보박스 칼럼 검색
@@ -403,17 +603,20 @@ namespace testAPP
             foreach (string[] row in data)
             {
                 bool addRow = true;
+
                 if (!string.IsNullOrEmpty(searchText))
                 {
-                    addRow = row.Any(col => col.ToLower().Contains(searchText));
-                }
-
-                if (addRow && !string.IsNullOrEmpty(filterColumn) && filterColumn != "전체")
-                {
-                    int columnIndex = lv_list.Columns.Cast<ColumnHeader>().ToList().FindIndex(c => c.Text == filterColumn);
-                    if (columnIndex != -1)
+                    if (!string.IsNullOrEmpty(filterColumn) && filterColumn != "전체")
                     {
-                        addRow = row[columnIndex].ToLower().Contains(searchText);
+                        int columnIndex = lv_list.Columns.Cast<ColumnHeader>().ToList().FindIndex(c => c.Text == filterColumn);
+                        if (columnIndex != -1)
+                        {
+                            addRow = detailed_Search(row[columnIndex], searchText);
+                        }
+                    }
+                    else
+                    {
+                        addRow = row.Any(col => detailed_Search(col, searchText));
                     }
                 }
 
@@ -425,7 +628,28 @@ namespace testAPP
             }
         }
 
+
+        /*
         // 리스트뷰 항목 선택 이벤트 핸들러 추가
+        private void lv_list_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lv_list.SelectedItems.Count > 0)
+            {
+                isUpdatingFromListView = true; // 리스트뷰에서 업데이트 시작
+
+                selectedIndex = lv_list.SelectedIndices[0]; // 선택된 항목의 인덱스 저장
+
+                // 선택된 항목의 텍스트박스를 업데이트
+                tb_title.Text = lv_list.SelectedItems[0].SubItems[1].Text;
+                tb_writer.Text = lv_list.SelectedItems[0].SubItems[2].Text;
+                tb_genre.Text = lv_list.SelectedItems[0].SubItems[3].Text;
+                tb_description.Text = lv_list.SelectedItems[0].SubItems[4].Text;
+
+                isUpdatingFromListView = false; // 리스트뷰에서 업데이트 종료
+            }
+        }*/
+
+        // 리스트뷰 선택 항목 변경 시
         private void lv_list_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (lv_list.SelectedItems.Count > 0)
@@ -444,6 +668,10 @@ namespace testAPP
             }
         }
 
+        private List<Tuple<string[], ListViewItem>> addedItems = new List<Tuple<string[], ListViewItem>>();
+        private List<string[]> modifiedData = new List<string[]>();
+
+        /*
         // 적용 버튼 클릭 시
         private void bt_apply_Click(object sender, EventArgs e)
         {
@@ -466,7 +694,77 @@ namespace testAPP
 
             // 별표 제거
             ResetLabels();
+        }*/
+
+
+
+        // 적용 버튼 클릭 시
+        private void bt_apply_Click(object sender, EventArgs e)
+        {
+            using (var conn = new NpgsqlConnection(connectionString))
+            {
+                conn.Open();
+
+                // 추가된 항목을 데이터베이스에 삽입
+                foreach (var Row in addedData)
+                {
+                    using (var cmd = new NpgsqlCommand("INSERT INTO book (title, writer, genre, description) VALUES (@title, @writer, @genre, @description)", conn))
+                    {
+                        cmd.Parameters.AddWithValue("title", Row[1]);
+                        cmd.Parameters.AddWithValue("writer", Row[2]);
+                        cmd.Parameters.AddWithValue("genre", Row[3]);
+                        cmd.Parameters.AddWithValue("description", Row[4]);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                addedData.Clear();
+
+                // 수정된 항목을 데이터베이스에 업데이트
+                foreach (var Row in modifiedData)
+                {
+                    using (var cmd = new NpgsqlCommand("UPDATE book SET title = @title, writer = @writer, genre = @genre, description = @description WHERE id = @id", conn))
+                    {
+                        cmd.Parameters.AddWithValue("id", Row[0]);
+                        cmd.Parameters.AddWithValue("title", Row[1]);
+                        cmd.Parameters.AddWithValue("writer", Row[2]);
+                        cmd.Parameters.AddWithValue("genre", Row[3]);
+                        cmd.Parameters.AddWithValue("description", Row[4]);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                modifiedData.Clear();
+
+                // 삭제된 항목을 데이터베이스에서 제거
+                foreach (var id in deletedIds)
+                {
+                    using (var cmd = new NpgsqlCommand("DELETE FROM book WHERE id = @id", conn))
+                    {
+                        cmd.Parameters.AddWithValue("id", id); // id는 string 타입
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                deletedIds.Clear();
+            }
+
+            // 데이터베이스에서 데이터 다시 로드
+            LoadDataFromDatabase();
+
+            // 변경 사항 초기화
+            addedData.Clear();
+            deletedIds.Clear();
+            modifiedData.Clear();
+
+            // 전체 도서수 업데이트
+            total_books.Text = "전체 도서수 : " + data.Count.ToString();
+
+            // 결과 보고 라벨 업데이트
+            results_report2.Text = "변경사항이 데이터베이스에 저장되었습니다.";
+
+            // 별표 제거
+            ResetLabels();
         }
+
+
 
         // 새로고침 버튼 클릭 시
         private void bt_refresh_Click(object sender, EventArgs e)
@@ -478,10 +776,7 @@ namespace testAPP
             total_books.Text = "전체 도서수 : " + data.Count.ToString();
 
             // 텍스트 박스 및 선택된 항목 초기화
-            tb_title.Text = "";
-            tb_writer.Text = "";
-            tb_genre.Text = "";
-            tb_description.Text = "";
+            tb_clear();
 
             // 선택된 항목 초기화
             selectedIndex = -1;
@@ -494,6 +789,15 @@ namespace testAPP
 
             // 별표 제거
             ResetLabels();
+        }
+
+        //텍스트박스 청소
+        public void tb_clear()
+        {
+            tb_title.Text = "";
+            tb_writer.Text = "";
+            tb_genre.Text = "";
+            tb_description.Text = "";
         }
 
         // 수정된 라벨 별표 추가
@@ -519,6 +823,46 @@ namespace testAPP
             writer_label.Text = "Writer";
             genre_label.Text = "Genre";
             description_label.Text = "Description";
+        }
+        private string originalTitle = "";
+        private string originalWriter = "";
+        private string originalGenre = "";
+        private string originalDescription = "";
+
+        //검색 엔터키 이벤트
+        private void tb_search_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter){
+                search_Click(sender, e);
+            }
+        }
+
+        //검색조건 추가
+        private bool detailed_Search(string text, string pattern)
+        {
+            // *로 시작하고 *로 끝나는 경우 (중간에 해당하는 문자열이 포함되는지 체크)
+            if (pattern.StartsWith("*") && pattern.EndsWith("*"))
+            {
+                string subPattern = pattern.Trim('*').ToLower();
+                return text.ToLower().Contains(subPattern);
+            }
+            // *로 시작하는 경우 (문자열 끝이 패턴으로 끝나는지 체크)
+            else if (pattern.StartsWith("*"))
+            {
+                string subPattern = pattern.TrimStart('*').ToLower();
+                return text.ToLower().EndsWith(subPattern);
+            }
+            // *로 끝나는 경우 (문자열 시작이 패턴으로 시작하는지 체크)
+            else if (pattern.EndsWith("*"))
+            {
+                string subPattern = pattern.TrimEnd('*').ToLower();
+                return text.ToLower().StartsWith(subPattern);
+            }
+            // *가 없는 경우 (완전 일치 체크)
+            else
+            {
+                return text.ToLower() == pattern.ToLower();
+            }
         }
     }
 }
