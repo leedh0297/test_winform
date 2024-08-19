@@ -700,68 +700,79 @@ namespace testAPP
         // 적용 버튼 클릭 시
         private void bt_apply_Click(object sender, EventArgs e)
         {
-            using (var conn = new NpgsqlConnection(connectionString))
+            try
             {
-                conn.Open();
-
-                // 추가된 항목을 데이터베이스에 삽입
-                foreach (var Row in addedData)
+                using (var conn = new NpgsqlConnection(connectionString))
                 {
-                    using (var cmd = new NpgsqlCommand("INSERT INTO book (title, writer, genre, description) VALUES (@title, @writer, @genre, @description)", conn))
+                    conn.Open();
+
+                    // 추가된 항목을 데이터베이스에 삽입
+                    foreach (var Row in addedData)
                     {
-                        cmd.Parameters.AddWithValue("title", Row[1]);
-                        cmd.Parameters.AddWithValue("writer", Row[2]);
-                        cmd.Parameters.AddWithValue("genre", Row[3]);
-                        cmd.Parameters.AddWithValue("description", Row[4]);
-                        cmd.ExecuteNonQuery();
+                        using (var cmd = new NpgsqlCommand("INSERT INTO book (title, writer, genre, description) VALUES (@title, @writer, @genre, @description)", conn))
+                        {
+                            cmd.Parameters.AddWithValue("title", Row[1]);
+                            cmd.Parameters.AddWithValue("writer", Row[2]);
+                            cmd.Parameters.AddWithValue("genre", Row[3]);
+                            cmd.Parameters.AddWithValue("description", Row[4]);
+                            cmd.ExecuteNonQuery();
+                        }
                     }
+                    addedData.Clear();
+
+                    // 수정된 항목을 데이터베이스에 업데이트
+                    foreach (var Row in modifiedData)
+                    {
+                        using (var cmd = new NpgsqlCommand("UPDATE book SET title = @title, writer = @writer, genre = @genre, description = @description WHERE id = @id", conn))
+                        {
+                            // 여기서 Row[0]을 long 타입으로 변환
+                            cmd.Parameters.AddWithValue("id", Convert.ToInt64(Row[0])); // or long.Parse(Row[0].ToString())
+                            cmd.Parameters.AddWithValue("title", Row[1]);
+                            cmd.Parameters.AddWithValue("writer", Row[2]);
+                            cmd.Parameters.AddWithValue("genre", Row[3]);
+                            cmd.Parameters.AddWithValue("description", Row[4]);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    modifiedData.Clear();
+
+                    // 삭제된 항목을 데이터베이스에서 제거
+                    foreach (var id in deletedIds)
+                    {
+                        using (var cmd = new NpgsqlCommand("DELETE FROM book WHERE id = @id", conn))
+                        {
+                            // 여기서 id를 long 타입으로 변환
+                            cmd.Parameters.AddWithValue("id", Convert.ToInt64(id)); // or long.Parse(id.ToString())
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    deletedIds.Clear();
                 }
+
+                // 데이터베이스에서 데이터 다시 로드
+                LoadDataFromDatabase();
+
+                // 변경 사항 초기화
                 addedData.Clear();
-
-                // 수정된 항목을 데이터베이스에 업데이트
-                foreach (var Row in modifiedData)
-                {
-                    using (var cmd = new NpgsqlCommand("UPDATE book SET title = @title, writer = @writer, genre = @genre, description = @description WHERE id = @id", conn))
-                    {
-                        cmd.Parameters.AddWithValue("id", Row[0]);
-                        cmd.Parameters.AddWithValue("title", Row[1]);
-                        cmd.Parameters.AddWithValue("writer", Row[2]);
-                        cmd.Parameters.AddWithValue("genre", Row[3]);
-                        cmd.Parameters.AddWithValue("description", Row[4]);
-                        cmd.ExecuteNonQuery();
-                    }
-                }
+                deletedIds.Clear();
                 modifiedData.Clear();
 
-                // 삭제된 항목을 데이터베이스에서 제거
-                foreach (var id in deletedIds)
-                {
-                    using (var cmd = new NpgsqlCommand("DELETE FROM book WHERE id = @id", conn))
-                    {
-                        cmd.Parameters.AddWithValue("id", id); // id는 string 타입
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-                deletedIds.Clear();
+                // 전체 도서수 업데이트
+                total_books.Text = "전체 도서수 : " + data.Count.ToString();
+
+                // 결과 보고 라벨 업데이트
+                results_report2.Text = "변경사항이 데이터베이스에 저장되었습니다.";
+
+                // 별표 제거
+                ResetLabels();
             }
-
-            // 데이터베이스에서 데이터 다시 로드
-            LoadDataFromDatabase();
-
-            // 변경 사항 초기화
-            addedData.Clear();
-            deletedIds.Clear();
-            modifiedData.Clear();
-
-            // 전체 도서수 업데이트
-            total_books.Text = "전체 도서수 : " + data.Count.ToString();
-
-            // 결과 보고 라벨 업데이트
-            results_report2.Text = "변경사항이 데이터베이스에 저장되었습니다.";
-
-            // 별표 제거
-            ResetLabels();
+            catch (Exception ex)
+            {
+                // 예외 발생 시 오류 메시지 출력
+                MessageBox.Show($"오류가 발생했습니다: {ex.Message}");
+            }
         }
+
 
 
 
