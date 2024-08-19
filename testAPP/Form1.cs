@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -47,6 +48,9 @@ namespace testAPP
 
             // SelectedIndexChanged 이벤트 핸들러 추가
             lv_list.SelectedIndexChanged += new EventHandler(lv_list_SelectedIndexChanged);
+
+            // KeyDown 이벤트 핸들러 추가 (Enter 키로 검색)
+            tb_search.KeyDown += new KeyEventHandler(tb_search_KeyDown);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -73,8 +77,14 @@ namespace testAPP
                             // 열 너비를 데이터 유형에 따라 결정 (여기서는 임의로 설정)
                             int columnWidth = dataType == "text" ? 300 : 100;
 
-                            // 열 추가
-                            lv_list.Columns.Add(columnName, columnWidth);
+                            // 열 추가 (Title 열은 가운데 정렬)
+                            var columnHeader = new ColumnHeader
+                            {
+                                Text = columnName,
+                                Width = columnWidth,
+                                TextAlign = columnName == "title" ? HorizontalAlignment.Center : HorizontalAlignment.Left // Title 열은 가운데 정렬, 나머지는 왼쪽 정렬
+                            };
+                            lv_list.Columns.Add(columnHeader);
                         }
                     }
                 }
@@ -82,6 +92,7 @@ namespace testAPP
 
             lv_list.View = View.Details; // ListView를 상세보기로 설정
         }
+
 
         // 데이터베이스에서 데이터 로드
         private void LoadDataFromDatabase()
@@ -126,6 +137,14 @@ namespace testAPP
         {
             string searchText = tb_search.Text.ToLower(); // 검색어를 소문자로 변환
             string selectedColumn = cb_filter.SelectedItem.ToString(); // 선택된 콤보박스 항목
+
+            // '*' 기호를 '%'로 변환
+            if (searchText.Contains("*"))
+            {
+                searchText = searchText.Replace("*", "%");
+            }
+
+            // ListView 업데이트
             UpdateListView(selectedColumn, searchText); // ListView를 업데이트
         }
 
@@ -436,26 +455,27 @@ namespace testAPP
                 AddRowToListView(row, filterColumn, searchText);
             }
 
-            foreach (var addedItem in addedItems)
-            {
-                AddRowToListView(addedItem.Item1, filterColumn, searchText);
-            }
         }
+
         private void AddRowToListView(string[] row, string filterColumn, string searchText)
         {
             bool addRow = true;
 
             if (!string.IsNullOrEmpty(searchText))
             {
-                addRow = row.Any(col => col.ToLower().Contains(searchText));
-            }
-
-            if (addRow && !string.IsNullOrEmpty(filterColumn) && filterColumn != "전체")
-            {
-                int columnIndex = lv_list.Columns.Cast<ColumnHeader>().ToList().FindIndex(c => c.Text == filterColumn);
-                if (columnIndex != -1)
+                if (!string.IsNullOrEmpty(filterColumn) && filterColumn != "전체")
                 {
-                    addRow = row[columnIndex].ToLower().Contains(searchText);
+                    // 필터된 열에 대해 검색어를 매칭
+                    int columnIndex = lv_list.Columns.Cast<ColumnHeader>().ToList().FindIndex(c => c.Text == filterColumn);
+                    if (columnIndex != -1)
+                    {
+                        addRow = IsMatch(row[columnIndex].ToLower(), searchText);
+                    }
+                }
+                else
+                {
+                    // 모든 열에 대해 검색어를 매칭
+                    addRow = row.Any(col => IsMatch(col.ToLower(), searchText));
                 }
             }
 
@@ -465,6 +485,29 @@ namespace testAPP
                 lv_list.Items.Add(item);
             }
         }
+
+        // * 기호를 포함한 검색어와 문자열을 비교하는 메서드
+        private bool IsMatch(string text, string pattern)
+        {
+            // 만약 *가 포함되어 있다면, 패턴을 부분 일치로 처리
+            if (pattern.StartsWith("%") && pattern.EndsWith("%"))
+            {
+                return text.Contains(pattern.Trim('%'));
+            }
+            else if (pattern.StartsWith("%")) 
+            {
+                return text.EndsWith(pattern.Trim('%'));
+            }
+            else if (pattern.EndsWith("%"))
+            {
+                return text.StartsWith(pattern.Trim('%'));
+            }
+            else
+            {
+                return text.Equals(pattern);
+            }    
+        }
+
 
         // 리스트뷰 선택 항목 변경 시
         private void lv_list_SelectedIndexChanged(object sender, EventArgs e)
@@ -538,6 +581,19 @@ namespace testAPP
 
             // 최대 ID 값의 자릿수를 반환
             return maxId.ToString().Length;
+        }
+
+        private void tb_search_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                // 엔터 키가 눌렸을 때 search_Click 이벤트 호출
+                search_Click(sender, e);
+
+                // 이벤트를 처리했음을 알리기 위해 KeyDown 이벤트를 더 이상 처리하지 않도록 설정
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
         }
 
 
