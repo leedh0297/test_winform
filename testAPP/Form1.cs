@@ -112,7 +112,6 @@ namespace testAPP
 
          
         // 데이터베이스에서 데이터 로드
-        // 데이터베이스에서 데이터 로드
         private void LoadDataFromDatabase()
         {
             int maxIdLength = 0; // ID 열의 최대 자릿수를 저장할 변수
@@ -121,16 +120,16 @@ namespace testAPP
             using (var conn = new NpgsqlConnection(connectionString))
             {
                 conn.Open();
-                using (var cmd = new NpgsqlCommand("SELECT id FROM book", conn))
+                using (var cmd = new NpgsqlCommand("SELECT id FROM book", conn))//id값 가져오기
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            int idLength = reader["id"].ToString().Length;
+                            int idLength = reader["id"].ToString().Length;      //id값 길이 계산
                             if (idLength > maxIdLength)
                             {
-                                maxIdLength = idLength;
+                                maxIdLength = idLength;     //id열의 최대 자릿수 저장
                             }
                         }
                     }
@@ -141,7 +140,7 @@ namespace testAPP
             using (var conn = new NpgsqlConnection(connectionString))
             {
                 conn.Open();
-                using (var cmd = new NpgsqlCommand("SELECT * FROM book", conn))
+                using (var cmd = new NpgsqlCommand("SELECT * FROM book", conn))     //테이블의 모든 데이터 읽어오기
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -843,7 +842,7 @@ namespace testAPP
             // *로 시작하고 *로 끝나는 경우 (중간에 해당하는 문자열이 포함되는지 체크)
             if (pattern.StartsWith("*") && pattern.EndsWith("*"))
             {
-                string subPattern = pattern.Trim('*').ToLower();
+                string subPattern = pattern.Trim('*').ToLower();        //ToLower()대소문자 무시 Trim()공백제거
                 return text.ToLower().Contains(subPattern);
             }
             // *로 시작하는 경우 (문자열 끝이 패턴으로 끝나는지 체크)
