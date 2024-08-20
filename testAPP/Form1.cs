@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace testAPP
 {
-    public partial class Form1 : Form
+    public partial class library＿management : Form
     {
         private List<string[]> data = new List<string[]>(); // 데이터를 저장할 리스트
         private List<string> changes = new List<string>(); // 변경 내역을 저장할 리스트
@@ -24,7 +24,7 @@ namespace testAPP
         private List<int> deletedIds = new List<int>();
 
 
-        public Form1()
+        public library＿management()
         {
             InitializeComponent();
 
@@ -165,6 +165,7 @@ namespace testAPP
                 }
             }
             UpdateListView(); // ListView를 업데이트
+
         }
 
 
@@ -648,7 +649,7 @@ namespace testAPP
             }
         }*/
 
-        // 리스트뷰 선택 항목 변경 시
+        // 리스트뷰 선택 항목 선택시 텍스트박스에 출력
         private void lv_list_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (lv_list.SelectedItems.Count > 0)
@@ -667,7 +668,6 @@ namespace testAPP
             }
         }
 
-        private List<Tuple<string[], ListViewItem>> addedItems = new List<Tuple<string[], ListViewItem>>();
         private List<string[]> modifiedData = new List<string[]>();
 
         /*
@@ -697,7 +697,7 @@ namespace testAPP
 
 
 
-        // 적용 버튼 클릭 시
+        // 저장 버튼 클릭 시
         private void bt_apply_Click(object sender, EventArgs e)
         {
             try

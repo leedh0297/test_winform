@@ -1,6 +1,6 @@
 ﻿namespace testAPP
 {
-    partial class Form1
+    partial class library＿management
     {
         /// <summary>
         /// 필수 디자이너 변수입니다.
@@ -234,7 +234,7 @@
             this.results_report2.Size = new System.Drawing.Size(31, 17);
             this.results_report2.Text = "결과";
             // 
-            // Form1
+            // library＿management
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -258,7 +258,7 @@
             this.Controls.Add(this.bt_insert);
             this.Controls.Add(this.bt_search);
             this.Controls.Add(this.lv_list);
-            this.Name = "Form1";
+            this.Name = "library＿management";
             this.Text = "도서검색";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.statusStrip1.ResumeLayout(false);
