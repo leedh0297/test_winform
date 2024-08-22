@@ -84,6 +84,7 @@ namespace testAPP
                                 Width = columnWidth,
                                 TextAlign = columnName == "title" ? HorizontalAlignment.Center : HorizontalAlignment.Left // Title 열은 가운데 정렬, 나머지는 왼쪽 정렬
                             };
+
                             lv_list.Columns.Add(columnHeader);
                         }
                     }
@@ -508,7 +509,6 @@ namespace testAPP
             }    
         }
 
-
         // 리스트뷰 선택 항목 변경 시
         private void lv_list_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -595,7 +595,6 @@ namespace testAPP
                 e.SuppressKeyPress = true;
             }
         }
-
 
     }
 }
